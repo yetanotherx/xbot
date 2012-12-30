@@ -19,7 +19,7 @@ public class XBotDebug {
             if( ChatColor.isColored(message) ) {
                 logger.info("[" + name + " Debug] - " + message);
             } else {
-                logger.info("[" + name + " Debug] - " + ChatColor.GRAY + message);
+                logger.info("[" + name + " Debug] - " + ChatColor.DARK_GRAY + message);
             }
         }
     }

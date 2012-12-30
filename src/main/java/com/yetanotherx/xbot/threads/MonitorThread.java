@@ -2,6 +2,7 @@ package com.yetanotherx.xbot.threads;
 
 import com.yetanotherx.xbot.XBot;
 import com.yetanotherx.xbot.XBotDebug;
+import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.bots.BotThread;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ public class MonitorThread extends Thread {
 
     private XBot bot;
     private long startTime = System.currentTimeMillis();
+    private long apiCalls = 0;
     private boolean enabled = false;
 
     public MonitorThread(XBot bot) {
@@ -22,7 +24,6 @@ public class MonitorThread extends Thread {
 
         while (this.isEnabled()) {
             try {
-                // API calls / minute
                 // Database calls / minute
                 Thread.sleep(500);
             } catch (InterruptedException ex) {
@@ -34,13 +35,19 @@ public class MonitorThread extends Thread {
     public boolean isEnabled() {
         return this.enabled && !this.isInterrupted();
     }
-    
+
     public void disable() {
         this.enabled = false;
     }
 
     public synchronized int getBotCount() {
-        return bot.getBotList().size();
+        int count = 0;
+        for (BotThread ibot : bot.getBots()) {
+            if (ibot.isEnabled()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public int getThreadCount() {
@@ -53,8 +60,12 @@ public class MonitorThread extends Thread {
 
     public synchronized int getJobCount() {
         int count = 0;
-        for (BotThread ibot : bot.getBots().values()) {
-            count += ibot.getJobs().size();
+        for (BotThread ibot : bot.getBots()) {
+            for (BotJob<? extends BotThread> ijob : ibot.getJobs()) {
+                if (ijob.isEnabled()) {
+                    count++;
+                }
+            }
         }
         return count;
     }
@@ -71,7 +82,7 @@ public class MonitorThread extends Thread {
     public long getMillisecondsRunning() {
         return System.currentTimeMillis() - startTime;
     }
-    
+
     public long getStartTime() {
         return startTime;
     }
@@ -85,4 +96,17 @@ public class MonitorThread extends Thread {
         return out;
     }
 
+    public synchronized void newAPICall() {
+        apiCalls++;
+    }
+
+    public synchronized int getApiCallsPerMinute() {
+        long minutes = ((getMillisecondsRunning() / 1000L) / 60L);
+
+        if (minutes == 0) {
+            return (int) apiCalls; // prevent apiCalls/0
+        }
+
+        return (int) (apiCalls / minutes);
+    }
 }

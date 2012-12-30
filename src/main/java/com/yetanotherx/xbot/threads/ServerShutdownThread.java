@@ -15,10 +15,16 @@ public class ServerShutdownThread extends Thread {
     public void run() {
         XBotDebug.info("MAIN", "Shutting down bot threads.");
 
-        for (BotThread bot : main.getBotList()) {
+        for (BotThread bot : main.getBots()) {
+            if (!bot.isEnabled()) {
+                continue;
+            }
             XBotDebug.info("MAIN", "Shutting down " + bot.getClass().getSimpleName());
             bot.disable();
         }
+
+        main.getWiki().writeAllPending();
+        main.getWiki().shutdown();
 
         main.getMonitor().disable();
         main.getConsole().disable();

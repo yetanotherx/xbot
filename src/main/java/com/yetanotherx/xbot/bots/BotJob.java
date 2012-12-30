@@ -5,22 +5,22 @@ package com.yetanotherx.xbot.bots;
  * 
  * @author yetanotherx
  */
-public abstract class BotJob extends Thread {
+public abstract class BotJob<T extends BotThread> extends Thread {
 
     /**
      * Bot that owns this job
      */
-    protected final BotThread bot;
+    protected final T bot;
     
     /**
      * How long the thread should sleep after the job is complete
      */
-    private final long wait;
+    protected final long wait;
     
     /**
      * Whether or not to repeat the job indefinitely
      */
-    private final boolean repeat;
+    protected final boolean repeat;
     
     /**
      * Whether or not the job is enabled.
@@ -35,7 +35,7 @@ public abstract class BotJob extends Thread {
      */
     private boolean running = false;
 
-    public BotJob(BotThread bot, long wait, boolean repeat) {
+    public BotJob(T bot, long wait, boolean repeat) {
         this.bot = bot;
         this.wait = wait;
         this.repeat = repeat;
@@ -51,8 +51,12 @@ public abstract class BotJob extends Thread {
                 Thread.sleep(50);
             }
             
-            while (repeat && running) {
+            while (running) {
                 this.doRun();
+                
+                if( !repeat ) {
+                    break;
+                }
 
                 Thread.sleep(wait + 50);
             }
@@ -91,5 +95,16 @@ public abstract class BotJob extends Thread {
 
     public boolean isRunning() {
         return this.running;
+    }
+    
+    public String toString() {
+        return "BotJob[class=" + 
+                getClass().getCanonicalName() + 
+                ", thread=" + 
+                bot.getRealName() + 
+                ", wait=" + wait +
+                ", repeat=" + repeat + 
+                ", running=" + running +
+                ", enabled=" + enabled + "]";
     }
 }

@@ -71,7 +71,7 @@ public class ConsoleManager {
         try {
             reader = new ConsoleReader();
         } catch (IOException ex) {
-            XBotDebug.error("MAIN", "Exception inintializing console reader", ex);
+            XBotDebug.error("Console", "Exception inintializing console reader", ex);
             ex.printStackTrace();
         }
 
@@ -79,7 +79,7 @@ public class ConsoleManager {
         System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO), true));
         System.setErr(new PrintStream(new LoggerOutputStream(Level.SEVERE), true));
 
-        XBotDebug.debug("MAIN", "Console initialized.");
+        XBotDebug.debug("Console", "Console initialized.");
     }
 
     /**
@@ -138,7 +138,22 @@ public class ConsoleManager {
         } else if (!jline || !reader.getTerminal().isANSISupported()) {
             return ChatColor.strip(string);
         } else {
-            return string.replace(ChatColor.RED.toString(), "\033[1;31m").replace(ChatColor.YELLOW.toString(), "\033[1;33m").replace(ChatColor.BRIGHT_GREEN.toString(), "\033[1;32m").replace(ChatColor.CYAN.toString(), "\033[1;36m").replace(ChatColor.BLUE.toString(), "\033[1;34m").replace(ChatColor.PINK.toString(), "\033[1;35m").replace(ChatColor.BLACK.toString(), "\033[0;0m").replace(ChatColor.DARK_GRAY.toString(), "\033[1;30m").replace(ChatColor.DARK_RED.toString(), "\033[0;31m").replace(ChatColor.GOLD.toString(), "\033[0;33m").replace(ChatColor.DARK_GREEN.toString(), "\033[0;32m").replace(ChatColor.DARK_CYAN.toString(), "\033[0;36m").replace(ChatColor.DARK_BLUE.toString(), "\033[0;34m").replace(ChatColor.PURPLE.toString(), "\033[0;35m").replace(ChatColor.GRAY.toString(), "\033[0;37m").replace(ChatColor.WHITE.toString(), "\033[1;37m") + "\033[0m";
+            return string.replace(ChatColor.RED.toString(), "\033[1;31m")
+                    .replace(ChatColor.YELLOW.toString(), "\033[1;33m")
+                    .replace(ChatColor.BRIGHT_GREEN.toString(), "\033[1;32m")
+                    .replace(ChatColor.CYAN.toString(), "\033[1;36m")
+                    .replace(ChatColor.BLUE.toString(), "\033[1;34m")
+                    .replace(ChatColor.PINK.toString(), "\033[1;35m")
+                    .replace(ChatColor.BLACK.toString(), "\033[0;0m")
+                    .replace(ChatColor.DARK_GRAY.toString(), "\033[1;30m")
+                    .replace(ChatColor.DARK_RED.toString(), "\033[0;31m")
+                    .replace(ChatColor.GOLD.toString(), "\033[0;33m")
+                    .replace(ChatColor.DARK_GREEN.toString(), "\033[0;32m")
+                    .replace(ChatColor.DARK_CYAN.toString(), "\033[0;36m")
+                    .replace(ChatColor.DARK_BLUE.toString(), "\033[0;34m")
+                    .replace(ChatColor.PURPLE.toString(), "\033[0;35m")
+                    .replace(ChatColor.GRAY.toString(), "\033[0;37m")
+                    .replace(ChatColor.WHITE.toString(), "\033[1;37m") + "\033[0m";
         }
     }
 
@@ -164,7 +179,7 @@ public class ConsoleManager {
 
                     parent.processConsoleInput(command.trim());
                 } catch (Exception ex) {
-                    XBotDebug.error("MAIN", "Impossible exception while executing command", ex);
+                    XBotDebug.error("Console", "Impossible exception while executing command", ex);
                     ex.printStackTrace();
                 }
             }
@@ -212,7 +227,7 @@ public class ConsoleManager {
                     super.flush();
                 }
             } catch (IOException ex) {
-                XBotDebug.error("MAIN", "I/O exception flushing console output", ex);
+                XBotDebug.error("Console", "I/O exception flushing console output", ex);
             }
         }
     }
@@ -233,7 +248,7 @@ public class ConsoleManager {
                     setOutputStream(new FileOutputStream(filename, true));
                 }
             } catch (FileNotFoundException ex) {
-                XBotDebug.error("MAIN", "Unable to open " + filename, ex);
+                XBotDebug.error("Console", "Unable to open " + filename, ex);
             }
         }
 
@@ -241,11 +256,11 @@ public class ConsoleManager {
         public synchronized void flush() {
             if (!filename.equals(calculateFilename())) {
                 filename = calculateFilename();
-                XBotDebug.info("MAIN", "Log rotating to " + filename);
+                XBotDebug.debug("Console", "Log rotating to " + filename);
                 try {
                     setOutputStream(new FileOutputStream(filename, true));
                 } catch (FileNotFoundException ex) {
-                    XBotDebug.error("MAIN", "Unable to open " + filename, ex);
+                    XBotDebug.error("Console", "Unable to open " + filename, ex);
                 }
             }
             super.flush();

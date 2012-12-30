@@ -50,7 +50,7 @@ public class CommandManager {
     protected Map<String, String> helpMessages = new HashMap<String, String>();
 
     public CommandManager(XBot parent) {
-        XBotDebug.debug("MAIN", "Command manager initialized.");
+        XBotDebug.debug("Command", "Command manager initialized.");
         this.parent = parent;
     }
 
@@ -60,7 +60,7 @@ public class CommandManager {
      * @return 
      */
     public List<Command> register(Class<? extends CommandContainer> clazz) {
-        XBotDebug.debug("MAIN", "Registering command handler " + clazz.getName());
+        XBotDebug.debug("Command", "Registering command handler " + clazz.getName());
         return registerMethods(clazz, null);
     }
 
@@ -78,7 +78,7 @@ public class CommandManager {
             CommandContainer obj = cons.newInstance(this.parent);
             return registerMethods(obj, parent);
         } catch (Exception e) {
-            XBotDebug.error("MAIN", "Failed to register commands", e);
+            XBotDebug.error("Command", "Failed to register commands", e);
         }
         return null;
     }
@@ -274,7 +274,7 @@ public class CommandManager {
         Set<String> allowedCommands = new HashSet<String>();
 
         for (Map.Entry<String, Method> entry : map.entrySet()) {
-            Method childMethod = entry.getValue();
+            allowedCommands.add(entry.getKey());
             found = true;
         }
 
@@ -406,9 +406,9 @@ public class CommandManager {
             try {
                 method.invoke(instance, methodArgs);
             } catch (IllegalArgumentException e) {
-                XBotDebug.error("MAIN", "Failed to execute command", e);
+                XBotDebug.error("Command", "Failed to execute command", e);
             } catch (IllegalAccessException e) {
-                XBotDebug.error("MAIN", "Failed to execute command", e);
+                XBotDebug.error("Command", "Failed to execute command", e);
             } catch (InvocationTargetException e) {
                 if (e.getCause() instanceof CommandException) {
                     throw (CommandException) e.getCause();

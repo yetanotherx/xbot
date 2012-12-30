@@ -1,27 +1,24 @@
 package com.yetanotherx.xbot;
 
+import com.yetanotherx.xbot.bots.BotRegistration;
 import com.yetanotherx.xbot.threads.MonitorThread;
 import com.yetanotherx.xbot.threads.ServerShutdownThread;
 import com.yetanotherx.xbot.bots.BotThread;
-import com.yetanotherx.xbot.bots.example.ExampleBot;
 import com.yetanotherx.xbot.console.ChatColor;
 import com.yetanotherx.xbot.console.ConsoleManager;
 import com.yetanotherx.xbot.console.commands.RootCommands;
+import com.yetanotherx.xbot.console.commands.WikiCommands;
 import com.yetanotherx.xbot.console.commands.util.CommandManager;
 import com.yetanotherx.xbot.exception.CommandException;
 import com.yetanotherx.xbot.exception.CommandUsageException;
 import com.yetanotherx.xbot.exception.MissingNestedCommandException;
 import com.yetanotherx.xbot.exception.UnhandledCommandException;
 import com.yetanotherx.xbot.exception.WrappedCommandException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import net.sourceforge.jwbf.core.actions.HttpActionClient;
 
 /**
  * Controller for XBot. Manages various Bot threads, console, commands, etc.
@@ -37,42 +34,35 @@ public class XBot {
      * Version of XBot. Set in getVersion()
      */
     private static String version;
-    
     /**
-     * All the registered bots. Key is the name, it must match the constructor name of the bot.
+     * All the registered bots. 
      */
-    private final Map<String, BotThread> bots = Collections.synchronizedMap(new HashMap<String, BotThread>());
-    
+    private final List<BotThread> bots = Collections.synchronizedList(new ArrayList<BotThread>());
     /**
      * Spout's console manager instance
      */
     private final ConsoleManager consoleManager;
-    
     /**
      * sk89q's command manager instance
      */
     private final CommandManager commandManager;
-    
     /**
      * Monitor thread instance.
      */
     private final MonitorThread monitor;
-    
     /**
      * Command line arguments. Direct copy of args in the main method
      */
     private final String[] args;
-    
     /**
      * Configuration from config & command line
      */
     private final XBotConfig conf;
-    
     /**
      * Main wiki instance
      */
-    private Wiki wiki;
-    
+    private XBotWiki wiki;
+
     static {
         getVersion();   // Sets version variable
     }
@@ -86,7 +76,7 @@ public class XBot {
         this.consoleManager = new ConsoleManager(this, useJline, useConsole);
         this.consoleManager.start();
 
-        this.wiki = this.makeWiki();
+        this.wiki = new XBotWiki(this, conf.getURL());
         this.monitor = new MonitorThread(this);
 
         this.commandManager = new CommandManager(this);
@@ -105,9 +95,9 @@ public class XBot {
         monitor.start();
         wiki.begin();
 
-        for (Entry<String, BotThread> bot : bots.entrySet()) {
-            XBotDebug.info("MAIN", "Starting bot " + bot.getKey());
-            bot.getValue().start();
+        for (BotThread bot : bots) {
+            XBotDebug.info("MAIN", ChatColor.BRIGHT_GREEN + "Starting bot " + bot.getRealName());
+            bot.start();
             Thread.sleep(50);
         }
 
@@ -117,30 +107,27 @@ public class XBot {
     }
 
     /**
-     * Makes a wiki instance, using the custom HttpActionClient which throttles
-     * outputs. 
-     * @return 
-     */
-    private Wiki makeWiki() {
-        try {
-            XBotDebug.debug("MAIN", "Creating Wiki instance...");
-            HttpActionClient client = new HttpActionClientThrottled(this, new URL(conf.getURL()));
-            return new Wiki(this, client);
-        } catch (MalformedURLException ex) {
-            throw new IllegalArgumentException("Malformed URL given", ex);
-        }
-    }
-
-    /**
      * Registers all bot threads. 
      */
     private synchronized void addBots() {
         XBotDebug.debug("MAIN", "Registering bots");
-        
+
         // Key MUST MATCH the constructor's name!
-        
+
         //bots.put("AIV", new AIVBot(this, "AIV"));
-        bots.put("Example", new ExampleBot(this, "Example"));
+        //bots.put("Example", new ExampleBot(this, "Example"));
+
+        for (Entry<String, Class<? extends BotThread>> b : BotRegistration.botList.entrySet()) {
+            try {
+                bots.add(b.getValue().getConstructor(XBot.class, String.class).newInstance(this, b.getKey()));
+            } catch (NoSuchMethodException ex) {
+            } catch (SecurityException ex) {
+            } catch (InstantiationException ex) {
+            } catch (IllegalAccessException ex) {
+            } catch (IllegalArgumentException ex) {
+            } catch (InvocationTargetException ex) {
+            }
+        }
     }
 
     /**
@@ -149,6 +136,8 @@ public class XBot {
     private void addCommands() {
         XBotDebug.debug("MAIN", "Registering commands");
         commandManager.register(RootCommands.class);
+        commandManager.register(WikiCommands.class);
+
     }
 
     /**
@@ -156,7 +145,7 @@ public class XBot {
      * @param bot 
      */
     public void disableBot(BotThread bot) {
-        XBotDebug.debug("MAIN", "Disabling bot " + bot.getName());
+        XBotDebug.debug("MAIN", "Disabling bot " + bot.getRealName());
         bot.disable();
     }
 
@@ -165,18 +154,51 @@ public class XBot {
      * @param botName 
      */
     public synchronized void disableBot(String botName) {
-        this.disableBot(bots.get(botName));
+        for (BotThread bot : bots) {
+            if (botName.equals(bot.getRealName()) && bot.isEnabled()) {
+                this.disableBot(bot);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Enables the bot with the given name
+     * @param botName 
+     */
+    public synchronized void enableBot(String botName) {
+        Class<? extends BotThread> clazz = BotRegistration.botList.get(botName);
+        if (clazz != null) {
+            XBotDebug.debug("MAIN", "Enabling bot " + botName);
+
+            try {
+                BotThread bot = clazz.getConstructor(XBot.class, String.class).newInstance(this, botName);
+                bots.add(bot);
+                bot.start();
+            } catch (NoSuchMethodException ex) {
+            } catch (SecurityException ex) {
+            } catch (InstantiationException ex) {
+            } catch (IllegalAccessException ex) {
+            } catch (IllegalArgumentException ex) {
+            } catch (InvocationTargetException ex) {
+            }
+        }
+    }
+
+    public boolean isBotEnabled(String botName) {
+        for (BotThread bot : bots) {
+            if (botName.equals(bot.getRealName())) {
+                return bot.isEnabled();
+            }
+        }
+        return false;
     }
 
     public String[] getArgs() {
         return args;
     }
 
-    public synchronized List<BotThread> getBotList() {
-        return new ArrayList<BotThread>(bots.values());
-    }
-
-    public synchronized Map<String, BotThread> getBots() {
+    public synchronized List<BotThread> getBots() {
         return bots;
     }
 
@@ -188,7 +210,7 @@ public class XBot {
         return monitor;
     }
 
-    public Wiki getWiki() {
+    public XBotWiki getWiki() {
         return wiki;
     }
 

@@ -41,7 +41,7 @@ public class XBotConfig {
         XBotConfig out = new XBotConfig();
         out.username = props.getProperty("username");
         out.password = props.getProperty("password");
-        out.url = props.getProperty("api", "http://en.wikipedia.org/w/api.php");
+        out.url = props.getProperty("api", "en.wikipedia.org");
         out.editRate = Integer.parseInt(props.getProperty("editRate", "12"));
         out.maxlag = Integer.parseInt(props.getProperty("maxlag", "5"));
         out.confirmBot = Boolean.parseBoolean(props.getProperty("confirmBot", "true"));

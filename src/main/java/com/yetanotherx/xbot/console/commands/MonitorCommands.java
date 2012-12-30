@@ -37,6 +37,7 @@ public class MonitorCommands extends CommandContainer {
         XBotDebug.info("MAIN", ChatColor.GRAY + " Free memory: " + mon.getMemory()[1]);
         XBotDebug.info("MAIN", ChatColor.GRAY + " Max memory: " + mon.getMemory()[2]);
         XBotDebug.info("MAIN", ChatColor.GRAY + " Used memory: " + mon.getMemory()[3]);
+        XBotDebug.info("MAIN", ChatColor.GRAY + " API calls per minute: " + mon.getApiCallsPerMinute());
         XBotDebug.info("MAIN", ChatColor.GRAY + " Uptime: " + Util.millisToString(mon.getMillisecondsRunning()));
 
         Map<String, String> sys = mon.getSystemInfo();
@@ -52,8 +53,11 @@ public class MonitorCommands extends CommandContainer {
 
         XBotDebug.info("MAIN", ChatColor.GOLD + " Number of bots running: " + ChatColor.BRIGHT_GREEN + mon.getBotCount());
 
-        for (BotThread bot : parent.getBotList()) {
-            XBotDebug.info("MAIN", ChatColor.YELLOW + "   " + bot.getName() + ChatColor.CYAN + " (" + bot.getClass().getCanonicalName() + ")");
+        for (BotThread bot : parent.getBots()) {
+            if (!bot.isEnabled()) {
+                continue;
+            }
+            XBotDebug.info("MAIN", ChatColor.YELLOW + "   " + bot.getRealName() + ChatColor.CYAN + " (" + bot.getClass().getCanonicalName() + ")");
         }
     }
 
@@ -76,8 +80,11 @@ public class MonitorCommands extends CommandContainer {
 
         XBotDebug.info("MAIN", ChatColor.GOLD + " Number of jobs running: " + ChatColor.BRIGHT_GREEN + mon.getJobCount());
 
-        for (BotThread bot : parent.getBotList()) {
-            for (BotJob job : bot.getJobs()) {
+        for (BotThread bot : parent.getBots()) {
+            for (BotJob<? extends BotThread> job : bot.getJobs()) {
+                if (!job.isEnabled()) {
+                    continue;
+                }
                 StringBuilder b = new StringBuilder();
                 b.append(ChatColor.YELLOW);
                 b.append("   ");
@@ -88,7 +95,7 @@ public class MonitorCommands extends CommandContainer {
                 b.append(")");
                 XBotDebug.info("MAIN", b.toString());
             }
-            
+
         }
     }
 
@@ -96,31 +103,39 @@ public class MonitorCommands extends CommandContainer {
     desc = "Amount of memory in use.")
     public void mem(CommandContext args) throws CommandException {
         MonitorThread mon = parent.getMonitor();
-        
+
         XBotDebug.info("MAIN", ChatColor.GOLD + " Memory usage: ");
-        
+
         XBotDebug.info("MAIN", ChatColor.YELLOW + "   Total memory: " + ChatColor.CYAN + mon.getMemory()[0] + " MB");
         XBotDebug.info("MAIN", ChatColor.YELLOW + "   Free memory: " + ChatColor.CYAN + mon.getMemory()[1] + " MB");
         XBotDebug.info("MAIN", ChatColor.YELLOW + "   Max memory: " + ChatColor.CYAN + mon.getMemory()[2] + " MB");
-        
+
         ChatColor out = ChatColor.BRIGHT_GREEN;
-        if( mon.getMemory()[3] > mon.getMemory()[1] ) {
+        if (mon.getMemory()[3] > mon.getMemory()[1]) {
             out = ChatColor.YELLOW;
         }
-        if( mon.getMemory()[1] < (mon.getMemory()[2]/10) ) {
+        if (mon.getMemory()[1] < (mon.getMemory()[2] / 10)) {
             out = ChatColor.RED;
         }
         XBotDebug.info("MAIN", ChatColor.YELLOW + "   Used memory: " + out + mon.getMemory()[3] + " MB");
-        
+
     }
 
-    @Command(aliases = {"time", "uptime"},
+    @Command(aliases = {"time"},
     desc = "Time since the bot was started.")
     public void time(CommandContext args) throws CommandException {
         MonitorThread mon = parent.getMonitor();
 
         XBotDebug.info("MAIN", ChatColor.YELLOW + "Uptime: " + ChatColor.CYAN + Util.millisToString(mon.getMillisecondsRunning()));
         XBotDebug.info("MAIN", ChatColor.YELLOW + "Date started: " + ChatColor.CYAN + Util.formatDate(mon.getStartTime()));
+    }
+
+    @Command(aliases = {"api"},
+    desc = "Average API calls per minute.")
+    public void api(CommandContext args) throws CommandException {
+        MonitorThread mon = parent.getMonitor();
+
+        XBotDebug.info("MAIN", ChatColor.YELLOW + "API Calls per minute: " + ChatColor.CYAN + mon.getApiCallsPerMinute());
     }
 
     @Command(aliases = {"info"},
@@ -133,5 +148,4 @@ public class MonitorCommands extends CommandContainer {
             XBotDebug.info("MAIN", ChatColor.YELLOW + " " + entry.getKey() + ": " + ChatColor.CYAN + entry.getValue());
         }
     }
-
 }

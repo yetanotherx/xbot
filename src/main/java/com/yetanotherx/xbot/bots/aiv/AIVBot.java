@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class AIVBot extends BotThread {
 
-    protected int readRate = 15;  //TODO: Make this configurable
+    protected final int readRate = 15;
     protected final String[] pages = new String[] {
         "Wikipedia:Administrator intervention against vandalism",
         "Wikipedia:Administrator intervention against vandalism/TB2",
@@ -16,6 +16,7 @@ public class AIVBot extends BotThread {
         "Wikipedia:Usernames for administrator attention/Bot",
         "Wikipedia:Usernames for administrator attention/holding pen"
     };
+    private final String version = "2.0.23";
     
     private String instructions = "";
     private Map<String, String> ips;
@@ -23,16 +24,22 @@ public class AIVBot extends BotThread {
     
     public AIVBot(XBot main, String name) {
         super(main, name);
+        
+    }
+
+    @Override
+    public void doRun() {
         this.addJob(new GetIPListJob(this, toLong(0, 0, 5, 0, 0), true));
         this.addJob(new GetInstructionsJob(this, toLong(0, 0, 15, 0, 0), true));
         
         for( String page : pages ) {
             this.addJob(new CheckPageJob(page, this, toLong(0, 0, 0, readRate, 0), true));
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+            }
         }
-    }
-
-    @Override
-    public void doRun() {
+        
         while(this.isRunning()) {
             
         }
@@ -64,6 +71,10 @@ public class AIVBot extends BotThread {
 
     public synchronized void setIPs(Map<String, String> ips) {
         this.ips = ips;
+    }
+
+    public String getVersion() {
+        return version;
     }
     
 }

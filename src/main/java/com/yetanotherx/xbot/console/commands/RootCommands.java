@@ -60,8 +60,10 @@ public class RootCommands extends CommandContainer {
     desc = "Stops all bot processes. Should always do this before stop.")
     public void halt(CommandContext args) throws CommandException {
         XBotDebug.info("MAIN", ChatColor.RED + "Stopping all bot processes");
-        for (BotThread bot : this.parent.getBotList()) {
-            bot.disable();
+        for (BotThread bot : this.parent.getBots()) {
+            if (bot.isEnabled()) {
+                parent.disableBot(bot);
+            }
         }
     }
 
@@ -72,16 +74,30 @@ public class RootCommands extends CommandContainer {
     max = 1)
     public void disable(CommandContext args) throws CommandException {
         String bot = args.getString(0);
-        BotThread theBot = this.parent.getBots().get(bot);
 
-        if (theBot.isEnabled() && theBot.isAlive()) {
+        if (parent.isBotEnabled(bot)) {
             XBotDebug.info("MAIN", ChatColor.BRIGHT_GREEN + "Disabling bot " + bot);
-            theBot.disable();
+            parent.disableBot(bot);
         } else {
             XBotDebug.error("MAIN", ChatColor.RED + bot + " is not running! ");
         }
     }
-    
+
+    @Command(aliases = {"enable"},
+    usage = "[<bot_name>]",
+    desc = "Starts a new bot with the given name",
+    min = 1,
+    max = 1)
+    public void enable(CommandContext args) throws CommandException {
+        String bot = args.getString(0);
+        if (parent.isBotEnabled(bot)) {
+            XBotDebug.error("MAIN", bot + " is already running!");
+        } else {
+            parent.enableBot(bot);
+            XBotDebug.info("MAIN", ChatColor.BRIGHT_GREEN + bot + " is now running!");
+        }
+    }
+
     @Command(aliases = {"monitor", "sys"},
     desc = "Monitor commands")
     @NestedCommand(MonitorCommands.class)
