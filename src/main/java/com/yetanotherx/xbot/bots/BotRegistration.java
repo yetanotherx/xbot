@@ -17,7 +17,7 @@ public class BotRegistration {
     
     static {
         Map<String, Class<? extends BotThread>> list = new HashMap<String, Class<? extends BotThread>>();
-        //list.put("AIV", AIVBot.class);
+        list.put("AIV", AIVBot.class);
         list.put("Example", ExampleBot.class);
         
         botList = Collections.unmodifiableMap(list);

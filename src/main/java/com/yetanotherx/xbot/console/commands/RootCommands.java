@@ -3,6 +3,7 @@ package com.yetanotherx.xbot.console.commands;
 import com.google.common.base.Joiner;
 import com.yetanotherx.xbot.XBot;
 import com.yetanotherx.xbot.XBotDebug;
+import com.yetanotherx.xbot.bots.BotRegistration;
 import com.yetanotherx.xbot.bots.BotThread;
 import com.yetanotherx.xbot.console.ChatColor;
 import com.yetanotherx.xbot.console.commands.util.Command;
@@ -90,6 +91,10 @@ public class RootCommands extends CommandContainer {
     max = 1)
     public void enable(CommandContext args) throws CommandException {
         String bot = args.getString(0);
+        if( !BotRegistration.botList.containsKey(bot) ) {
+            XBotDebug.error("MAIN", bot + " is not a known bot!");
+        }
+        
         if (parent.isBotEnabled(bot)) {
             XBotDebug.error("MAIN", bot + " is already running!");
         } else {
