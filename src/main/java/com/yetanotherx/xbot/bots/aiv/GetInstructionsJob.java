@@ -5,8 +5,6 @@ import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.console.ChatColor;
 import com.yetanotherx.xbot.util.Util;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class GetInstructionsJob extends BotJob<AIVBot> {
 

@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.util;
 
+import com.google.common.base.Joiner;
 import java.util.Arrays;
 import java.util.List;
 import org.joda.time.Period;
@@ -59,5 +60,13 @@ public class Util {
     public static String formatDate(long millis) {
         DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
         return format.print(millis);
+    }
+    
+    public static String join(String key, String ... args) {
+        return Joiner.on(key).join(args);
+    }
+    
+    public static String join(String key, List<String> args) {
+        return Joiner.on(key).join(args);
     }
 }

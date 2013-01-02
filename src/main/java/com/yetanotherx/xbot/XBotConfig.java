@@ -92,6 +92,8 @@ public class XBotConfig {
                 acceptsAll(asList("nojline"), "Disables jline");
 
                 acceptsAll(asList("noconsole"), "Disables the console");
+                
+                acceptsAll(asList("nobots"), "Don't enable any bots on startup");
 
                 acceptsAll(asList("v", "version"), "Show the XBot Version");
 

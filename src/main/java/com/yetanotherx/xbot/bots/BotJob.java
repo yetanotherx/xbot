@@ -38,7 +38,16 @@ public abstract class BotJob<T extends BotThread> extends Thread {
     public BotJob(T bot, long wait, boolean repeat) {
         this.bot = bot;
         this.wait = wait;
-        this.repeat = repeat;
+        
+        if( this.wait == 0 ) {
+            this.repeat = false;
+        } else {
+            this.repeat = repeat;
+        }
+    }
+    
+    public BotJob(T bot) {
+        this(bot, 0, false);
     }
 
     public void run() {

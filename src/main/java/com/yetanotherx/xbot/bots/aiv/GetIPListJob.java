@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static com.yetanotherx.xbot.util.RegexUtil.*;
 
 public class GetIPListJob extends BotJob<AIVBot> {
 
@@ -25,50 +23,47 @@ public class GetIPListJob extends BotJob<AIVBot> {
     public void doRun() {
         try {
             XBotDebug.info("AIV", ChatColor.GRAY + "Getting IP list...");
-            
+
             String content = bot.getParent().getWiki().getPageText("User:HBC AIV helperbot/Special IPs");
-            if( !content.isEmpty() ) {
+            if (!content.isEmpty()) {
                 Map<String, String> ips = new HashMap<String, String>();
                 List<String> cats = new ArrayList<String>();
-                
-                for( String line : content.split("\n") ) {
+
+                for (String line : content.split("\n")) {
                     line = line.trim();
-                    
-                    Matcher m = Pattern.compile("^\\* \\[\\[:Category:(.*?)\\]\\]$").matcher(line);
-                    if( m.find() ) {
+
+                    Matcher m = getMatcher("^\\* \\[\\[:Category:(.*?)\\]\\]$", line);
+                    if (m.matches()) {
                         cats.add(m.group(1));
                         continue;
                     }
-                    
-                    m = Pattern.compile("^;(.*?):(.*)$").matcher(line);
-                    if( m.find() ) {
+
+                    m = getMatcher("^;(.*?):(.*)$", line);
+                    if (m.matches()) {
                         String ip = m.group(1);
                         String note = "This IP matches the mask (" + ip + ") in my [[User:HBC AIV helperbot/Special IPs|special IP list]] which is marked as: " + m.group(2);
                         String ip_no_range = ip.replaceAll("/\\d{1,2}$", "");
-                        
-                        if( !InetAddresses.isInetAddress(ip_no_range) ) {
+
+                        if (!InetAddresses.isInetAddress(ip_no_range)) {
                             continue;
                         }
-                        
+
                         ips.put(ip, note);
                     }
-                    
+
                 }
-                
+
                 bot.setIPs(ips);
                 bot.setCategories(cats);
-                
+
                 XBotDebug.debug("AIV", ChatColor.GRAY + "IPs fetched, will recheck in " + ChatColor.BLUE + Util.millisToString(wait));
             }
         } catch (IOException ex) {
             XBotDebug.error("AIV", "Could not read from wiki.", ex);
         }
-        
-        
     }
 
     @Override
     public void doShutdown() {
     }
-    
 }

@@ -95,10 +95,15 @@ public class XBot {
         monitor.start();
         wiki.begin();
 
-        for (BotThread bot : bots) {
-            XBotDebug.info("MAIN", ChatColor.BRIGHT_GREEN + "Starting bot " + bot.getRealName());
-            bot.start();
-            Thread.sleep(50);
+        if (!this.conf.getOptions().has("nobots")) {
+            for (BotThread bot : bots) {
+                XBotDebug.info("MAIN", ChatColor.BRIGHT_GREEN + "Starting bot " + bot.getRealName());
+                bot.start();
+                Thread.sleep(50);
+            }
+        } else {
+            XBotDebug.warn("MAIN", "Not starting any bots. Bots must be enabled manually.");
+            
         }
 
         while (true) {
@@ -110,6 +115,10 @@ public class XBot {
      * Registers all bot threads. 
      */
     private synchronized void addBots() {
+        if (this.conf.getOptions().has("nobots")) {
+            return;
+        }
+        
         XBotDebug.debug("MAIN", "Registering bots");
 
         // Key MUST MATCH the constructor's name!

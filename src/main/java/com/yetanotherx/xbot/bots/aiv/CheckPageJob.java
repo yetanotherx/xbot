@@ -1,5 +1,7 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import com.google.common.net.InetAddresses;
+import java.util.regex.Pattern;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.console.ChatColor;
@@ -10,9 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import net.sourceforge.jwbf.core.contentRep.SimpleArticle;
 import org.apache.commons.net.util.SubnetUtils;
+import static com.yetanotherx.xbot.util.RegexUtil.getMatcher;
 
 public class CheckPageJob extends BotJob<AIVBot> {
 
@@ -30,9 +31,10 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
             String content = bot.getParent().getWiki().getPageText(page);
             if (!content.isEmpty()) {
-                Matcher m = Pattern.compile("\\{\\{((?:no)?adminbacklog)\\}\\}\\s*<\\!-- (?:HBC AIV helperbot )?v([\\d.]+) ((?:\\w+=\\S+\\s+)+)-->", Pattern.CASE_INSENSITIVE).matcher(content);
+                Matcher m = getMatcher("\\{\\{((?:no)?adminbacklog)\\}\\}\\s*<\\!-- (?:HBC AIV helperbot )?v([\\d.]+) ((?:\\w+=\\S+\\s+)+)-->", content, Pattern.CASE_INSENSITIVE);
 
-                if (!m.find()) {
+                if (!m.matches()) {
+                    // No parameters...
                     XBotDebug.warn("AIV", "Could not find parameter string on " + ChatColor.BLUE + page);
                 } else {
                     boolean backlog = m.group(1).equals("adminbacklog");
@@ -47,8 +49,8 @@ public class CheckPageJob extends BotJob<AIVBot> {
                     Map<String, String> params = this.parseParams(parameter_str);
 
                     if (params.get("FixInstructions").equals("on")) {
-                        if (!this.checkInstructions(content)) {
-                            return;
+                        if (!this.checkInstructions(content)) { 
+                            return; // Instructions are messed up, don't do anything
                         }
                     }
 
@@ -59,22 +61,22 @@ public class CheckPageJob extends BotJob<AIVBot> {
                     List<List<String>> ipCommentsNeeded = new ArrayList<List<String>>();
 
                     for (String line : content.split("\n")) {
-                        String[] comment = this.parseComment(line, inComment);
+                        String[] comment = AIVBot.parseComment(line, inComment);
                         inComment = Boolean.parseBoolean(comment[0]);
                         String bareLine = comment[1];
 
                         if (bareLine.equals(line) && inComment) {
-                            continue;
+                            continue;   // We're in a comment block, not going to do anything
                         }
 
-                        m = Pattern.compile("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(.+?)\\s*\\}\\}", Pattern.CASE_INSENSITIVE).matcher(bareLine);
-                        if (!m.find()) {
-                            continue;
+                        m = getMatcher("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(.+?)\\s*\\}\\}", bareLine, Pattern.CASE_INSENSITIVE);
+                        if (!m.matches()) {
+                            continue; // Go to next line if it's not a vandal template
                         }
 
                         String user = m.group(2);
                         if (user.split("=").length > 1) {
-                            user = user.split("=")[1];
+                            user = user.split("=")[1];  // Get the username from the parameter name
                         }
 
                         reportCount++;
@@ -86,12 +88,12 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
                         if (userCount.get(user) > 1 && !merged && params.get("MergeDuplicates").equals("on")) {
                             XBotDebug.debug("AIV", ChatColor.GRAY + "Calling merge for " + ChatColor.PURPLE + user + ChatColor.GRAY + " on " + ChatColor.BLUE + page);
-                            this.bot.addJob(new MergeDuplicatesJob(page, bot, 0, false));
+                            this.bot.addJob(new MergeDuplicatesJob(bot, page));
                             merged = true;
                         }
 
                         if (params.get("RemoveBlocked").equals("on")) {
-                            this.bot.addJob(new CheckUserJob(user, bot, 0, false));
+                            this.bot.addJob(new CheckUserIsBlockedJob(bot, user, page));
                         }
 
                         List<String> cats = this.checkUserInCats(user, bot.getCategories());
@@ -100,7 +102,7 @@ public class CheckPageJob extends BotJob<AIVBot> {
                             message += (cats.size() > 1 ? "categories" : "category") + ": ";
 
                             for (int i = 0; i < cats.size() - 1; i++) {
-                                message += "[[:Category:" + cats.get(i) + "|" + cats.get(i) + "]]";
+                                message += "[[:Category:" + cats.get(i) + "|" + cats.get(i) + "]], ";
                             }
                             message += "[[:Category:" + cats.get(cats.size() - 1) + "|" + cats.get(cats.size() - 1) + "]].";
 
@@ -109,7 +111,7 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
                         if (!merged && params.get("AutoMark").equals("on") && !line.contains("<!-- Marked -->")) {
                             for (String mask : bot.getIPs().keySet()) {
-                                if (mask.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?:/\\d{1,2})?$")) {
+                                if (mask.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?:/\\d{1,2})?$") && InetAddresses.isInetAddress(user)) {
                                     SubnetUtils subnet = new SubnetUtils(mask);
                                     subnet.setInclusiveHostCount(true);
                                     if (subnet.getInfo().isInRange(user)) {
@@ -128,13 +130,13 @@ public class CheckPageJob extends BotJob<AIVBot> {
                     }
 
                     for (List<String> ipParams : ipCommentsNeeded) {
-                        this.bot.addJob(new CommentSpecialIPJob(ipParams, reportCount));
+                        this.bot.addJob(new CommentSpecialIPJob(bot, ipParams, reportCount));
                     }
 
                     if (params.get("AutoBacklog").equals("on") && !merged) {
                         if ((reportCount >= new Integer(params.get("AddLimit")) && !backlog)
                                 || (reportCount <= new Integer(params.get("RemoveLimit")) && backlog)) {
-                            this.bot.addJob(new FixBacklogJob(page, reportCount, params));
+                            this.bot.addJob(new SetBacklogJob(bot, page, reportCount, params));
                         }
                     }
                 }
@@ -152,7 +154,7 @@ public class CheckPageJob extends BotJob<AIVBot> {
         Map<String, String> out = new HashMap<String, String>();
         String[] split = parameter_str.split("\\s+");
 
-        for (String def : "RemoveBlocked MergeDuplicates AutoMark FixInstructions AutoBacklog".split(" ")) {
+        for (String def : bot.params) {
             out.put(def, "off");
         }
 
@@ -201,46 +203,20 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
     private boolean checkInstructions(String content) {
         if (!content.contains(bot.getInstructions())) {
-            bot.addJob(new FixInstructionsJob(page));
+            bot.addJob(new FixInstructionsJob(bot, page));
             return false;
         }
         return true;
     }
 
-    private String[] parseComment(String line, boolean inComment) {
-        boolean commentStart = false;
-        boolean commentEnd = false;
-        String remainder = "";
-
-        if (inComment) {
-            // Check if an opened comment ends in this line
-            if (line.contains("-->")) {
-                Matcher m = Pattern.compile("(.*?-->)").matcher(line);
-                if (m.find()) {
-                    line = m.replaceAll("");
-                    inComment = false;
-                    commentEnd = true;
-                    remainder = m.group(1);
-                }
+    private List<String> checkUserInCats(String user, List<String> categories) throws IOException {
+        List<String> out = new ArrayList<String>();
+        String[] pageCats = bot.getParent().getWiki().getCategories("User talk:" + user);
+        for( String cat : pageCats ) {
+            if( categories.contains(cat) ) {
+                out.add(cat);
             }
         }
-
-        line.replaceAll("<!--.*?-->", "");
-
-        Matcher m = Pattern.compile("<!--.*").matcher(line);
-        if (m.find()) {
-            line = m.replaceAll("");
-            inComment = true;
-            commentStart = true;
-        }
-        
-        return new String[] { String.valueOf(inComment), line, remainder };
-    }
-
-    private List<String> checkUserInCats(String user, List<String> categories) {
-        List<String> out = new ArrayList<String>();
-        
-        SimpleArticle user_page = bot.getParent().getWiki().readData("User talk:" + user);
-        user_page.
+        return out;
     }
 }

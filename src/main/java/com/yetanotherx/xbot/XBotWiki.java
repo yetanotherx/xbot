@@ -102,7 +102,8 @@ public class XBotWiki extends NewWiki {
         boolean minor = edit.minor;
         
         try {
-            super.edit(title, text, summary, minor, isMarkBot(), -2, null);
+            // TODO: Configure per bot
+            super.edit("User:X!/trial/" + title, text, summary, minor, isMarkBot(), -2, null);
         } catch (Exception ex) {
             XBotDebug.error("Wiki", "Error writing to " + title, ex);
         }
