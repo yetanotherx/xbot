@@ -7,7 +7,8 @@ import com.yetanotherx.xbot.util.Util;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import static com.yetanotherx.xbot.util.RegexUtil.lcMatches;
+import java.util.regex.Pattern;
+import static com.yetanotherx.xbot.util.RegexUtil.matches;
 
 public class CommentSpecialIPJob extends BotJob<AIVBot> {
 
@@ -36,7 +37,7 @@ public class CommentSpecialIPJob extends BotJob<AIVBot> {
                 for (String line : content.split("\n")) {
                     inComment = Boolean.parseBoolean(AIVBot.parseComment(line, inComment)[0]);
                     
-                    if (line.contains(user) && lcMatches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)", line)) {
+                    if (line.contains(user) && matches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)", line, Pattern.CASE_INSENSITIVE)) {
                         if (line.contains("<!-- Marked -->")) {
                             return;
                         }

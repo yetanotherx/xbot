@@ -20,18 +20,18 @@ public class GetInstructionsJob extends BotJob<AIVBot> {
             String content = bot.getParent().getWiki().getPageText("Wikipedia:Administrator intervention against vandalism/instructions");
             if (!content.isEmpty()) {
                 String inst = "";
-                boolean inSec = false;
+                boolean inSection = false;
 
                 for (String line : content.split("\n")) {
-                    if (!inSec && line.startsWith("<!-- HBC AIV helperbot BEGIN INSTRUCTIONS -->")) {
-                        inSec = true;
+                    if (!inSection && line.startsWith("<!-- HBC AIV helperbot BEGIN INSTRUCTIONS -->")) {
+                        inSection = true;
                         continue;
                     }
-                    if (inSec && line.startsWith("<!-- HBC AIV helperbot END INSTRUCTIONS -->")) {
-                        inSec = false;
+                    if (inSection && line.startsWith("<!-- HBC AIV helperbot END INSTRUCTIONS -->")) {
+                        inSection = false;
                     }
 
-                    if (!inSec) {
+                    if (inSection) {
                         inst += line + "\n";
                     }
                 }

@@ -31,9 +31,9 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
             String content = bot.getParent().getWiki().getPageText(page);
             if (!content.isEmpty()) {
-                Matcher m = getMatcher("\\{\\{((?:no)?adminbacklog)\\}\\}\\s*<\\!-- (?:HBC AIV helperbot )?v([\\d.]+) ((?:\\w+=\\S+\\s+)+)-->", content, Pattern.CASE_INSENSITIVE);
+                Matcher m = getMatcher("\\{\\{((?:no)?adminbacklog)\\}\\}\\s*<!-- (?:HBC AIV helperbot )?v(\\S+?) ((?:\\w+=\\S+\\s+)+)-->", content, Pattern.CASE_INSENSITIVE);
 
-                if (!m.matches()) {
+                if (!m.find()) {
                     // No parameters...
                     XBotDebug.warn("AIV", "Could not find parameter string on " + ChatColor.BLUE + page);
                 } else {
@@ -70,7 +70,7 @@ public class CheckPageJob extends BotJob<AIVBot> {
                         }
 
                         m = getMatcher("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(.+?)\\s*\\}\\}", bareLine, Pattern.CASE_INSENSITIVE);
-                        if (!m.matches()) {
+                        if (!m.find()) {
                             continue; // Go to next line if it's not a vandal template
                         }
 
@@ -111,7 +111,7 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
                         if (!merged && params.get("AutoMark").equals("on") && !line.contains("<!-- Marked -->")) {
                             for (String mask : bot.getIPs().keySet()) {
-                                if (mask.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?:/\\d{1,2})?$") && InetAddresses.isInetAddress(user)) {
+                                if (mask.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}") && InetAddresses.isInetAddress(user)) {
                                     SubnetUtils subnet = new SubnetUtils(mask);
                                     subnet.setInclusiveHostCount(true);
                                     if (subnet.getInfo().isInRange(user)) {
@@ -213,8 +213,8 @@ public class CheckPageJob extends BotJob<AIVBot> {
         List<String> out = new ArrayList<String>();
         String[] pageCats = bot.getParent().getWiki().getCategories("User talk:" + user);
         for( String cat : pageCats ) {
-            if( categories.contains(cat) ) {
-                out.add(cat);
+            if( categories.contains(cat.replace("Category:", "")) ) {
+                out.add(cat.replace("Category:", ""));
             }
         }
         return out;

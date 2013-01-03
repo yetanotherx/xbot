@@ -1,20 +1,20 @@
 package com.yetanotherx.xbot;
 
 import com.yetanotherx.xbot.console.ChatColor;
+import com.yetanotherx.xbot.util.RegexUtil;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
 import javax.security.auth.login.FailedLoginException;
-import javax.security.auth.login.LoginException;
 
 public class XBotWiki extends NewWiki {
 
     private static final long serialVersionUID = 7139487259719L;
     private XBot parent;
     private final Queue<Edit> toWrite = new ConcurrentLinkedQueue<Edit>();
-    private boolean enableWriteThrottling = true;
+    private boolean enableWriteThrottling = false; // TODO: overwrites true;
     private WriteArticleThread writeThread = new WriteArticleThread();
 
     public XBotWiki(XBot parent, String domain, String scriptPath) {
@@ -103,39 +103,14 @@ public class XBotWiki extends NewWiki {
         
         try {
             // TODO: Configure per bot
-            super.edit("User:X!/trial/" + title, text, summary, minor, isMarkBot(), -2, null);
+            super.edit(title, text, summary, minor, isMarkBot(), -2, null);
         } catch (Exception ex) {
             XBotDebug.error("Wiki", "Error writing to " + title, ex);
         }
     }
     
     private boolean failsNoBots(String text) {
-        return text.matches("(?si).*\\{\\{(nobots|bots\\|(allow=none|deny=(.*?" + parent.getConf().getUsername() + ".*?|all)|optout=all))\\}\\}.*");
-    }
-
-    @Override
-    public void edit(String title, String text, String summary) throws IOException, LoginException {
-        throw new UnsupportedOperationException("Use doEdit() instead.");
-    }
-
-    @Override
-    public void edit(String title, String text, String summary, Calendar basetime) throws IOException, LoginException {
-        throw new UnsupportedOperationException("Use doEdit() instead.");
-    }
-
-    @Override
-    public void edit(String title, String text, String summary, int section) throws IOException, LoginException {
-        throw new UnsupportedOperationException("Use doEdit() instead.");
-    }
-
-    @Override
-    public void edit(String title, String text, String summary, int section, Calendar basetime) throws IOException, LoginException {
-        throw new UnsupportedOperationException("Use doEdit() instead.");
-    }
-
-    @Override
-    public synchronized void edit(String title, String text, String summary, boolean minor, boolean bot, int section, Calendar basetime) throws IOException, LoginException {
-        throw new UnsupportedOperationException("Use doEdit() instead.");
+        return RegexUtil.matches("(?si).*\\{\\{(nobots|bots\\|(allow=none|deny=(.*?" + parent.getConf().getUsername() + ".*?|all)|optout=all))\\}\\}.*", text, Pattern.CASE_INSENSITIVE);
     }
 
     @Override

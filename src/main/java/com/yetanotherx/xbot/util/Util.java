@@ -72,7 +72,7 @@ public class Util {
     }
 
     public static int[] parseTZDate(String date) {
-        Matcher m = RegexUtil.getMatcher("^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})Z$", date);
+        Matcher m = RegexUtil.getMatcher("(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})Z", date);
         if (!m.matches()) {
             XBotDebug.error("Util", "Could not parse expiry string: " + date);
             return null;

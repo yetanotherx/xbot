@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import static com.yetanotherx.xbot.util.RegexUtil.*;
 
 public class SetBacklogJob extends BotJob<AIVBot> {
@@ -36,7 +37,7 @@ public class SetBacklogJob extends BotJob<AIVBot> {
                 List<String> newContent = new LinkedList<String>();
                 for (String line : content.split("\n")) {
 
-                    if (lcMatches("^\\{\\{(?:no)?adminbacklog\\}\\}", line)) {
+                    if (matches("^\\{\\{(?:no)?adminbacklog\\}\\}", line, Pattern.CASE_INSENSITIVE)) {
                         String tally = AIVBot.getReportSummary(reportCount);
 
                         if (reportCount >= addLimit) {

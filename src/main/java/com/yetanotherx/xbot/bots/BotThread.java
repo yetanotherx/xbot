@@ -134,7 +134,7 @@ public abstract class BotThread extends Thread {
     public void checkRunpage(String page) {
         try {
             String text = this.parent.getWiki().getPageText(page);
-            if( !text.toLowerCase().trim().matches("^(yes|run|enable|go)$") ) {
+            if( !text.toLowerCase().trim().matches("(yes|run|enable|go)") ) {
                 XBotDebug.error(getRealName(), "Bot disabled via " + page + "! Shutting down!");
                 this.parent.disableBot(this);
             }

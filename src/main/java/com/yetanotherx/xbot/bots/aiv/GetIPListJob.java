@@ -33,13 +33,13 @@ public class GetIPListJob extends BotJob<AIVBot> {
                     line = line.trim();
 
                     Matcher m = getMatcher("^\\* \\[\\[:Category:(.*?)\\]\\]$", line);
-                    if (m.matches()) {
+                    if (m.find()) {
                         cats.add(m.group(1));
                         continue;
                     }
 
                     m = getMatcher("^;(.*?):(.*)$", line);
-                    if (m.matches()) {
+                    if (m.find()) {
                         String ip = m.group(1);
                         String note = "This IP matches the mask (" + ip + ") in my [[User:HBC AIV helperbot/Special IPs|special IP list]] which is marked as: " + m.group(2);
                         String ip_no_range = ip.replaceAll("/\\d{1,2}$", "");

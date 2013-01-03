@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import java.util.ArrayList;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.console.ChatColor;
@@ -34,7 +35,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
                 int reportCount = 0;
                 boolean inComment = false;
 
-                List<String> contentList = Arrays.asList(content.split("\n"));
+                List<String> contentList = new ArrayList<String>(Arrays.asList(content.split("\n")));
                 while (contentList.size() > 0) {
                     String line = contentList.remove(0);
 
@@ -47,7 +48,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
                     }
 
                     Matcher m = getMatcher("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(.*?)\\s*\\}\\}", bareLine, Pattern.CASE_INSENSITIVE);
-                    if ((inComment && line.equals(bareLine)) || !m.matches()) {
+                    if ((inComment && line.equals(bareLine)) || !m.find()) {
                         // Either we're in a comment block, or the line doesn't match any template
                         newContent.add(line);
                         continue;
@@ -55,7 +56,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
 
                     String user = m.group(2);
                     m = getMatcher("^((?:1|user)=)", user, Pattern.CASE_INSENSITIVE);
-                    if (m.matches()) {
+                    if (m.find()) {
                         user = user.replace(m.group(1), "");
                     }
 
@@ -65,7 +66,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
                                 line = line.substring(1);
                             }
 
-                            getMatcher("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(.*?)\\s*\\}\\}", line, Pattern.CASE_INSENSITIVE).replaceAll("");
+                            line = getMatcher("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(.*?)\\s*\\}\\}", line, Pattern.CASE_INSENSITIVE).replaceAll("");
 
                             String oldLine = newContent.get(userTable.get(user));
                             oldLine += "\n:*" + line + " <small><sup>(Moved by bot)</sup></small>";
@@ -74,12 +75,12 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
                             newContent.add(line);
                             userTable.put(user, newContent.size() - 1);
 
-                            while (contentList.size() > 0 && !lcMatches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|", contentList.get(0)) && !contentList.get(0).contains("<!--")) {
+                            while (contentList.size() > 0 && !matches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|", contentList.get(0), Pattern.CASE_INSENSITIVE) && !contentList.get(0).contains("<!--")) {
                                 String myComment = contentList.remove(0);
                                 inComment = Boolean.parseBoolean(AIVBot.parseComment(myComment, inComment)[0]);
 
                                 String oldLine = newContent.get(userTable.get(user));
-                                oldLine += "\n" + comment;
+                                oldLine += "\n" + myComment;
                                 newContent.set(userTable.get(user), oldLine);
                             }
                             reportCount++;

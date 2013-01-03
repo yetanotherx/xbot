@@ -8,15 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+/**
+ * TODO: Runpage
+ */
 public class AIVBot extends BotThread {
 
-    protected final int readRate = 15;
+    protected final int readRate = 30;
     protected final String[] pages = new String[]{
         "Wikipedia:Administrator intervention against vandalism",
         "Wikipedia:Administrator intervention against vandalism/TB2",
         "Wikipedia:Usernames for administrator attention",
         "Wikipedia:Usernames for administrator attention/Bot",
-        "Wikipedia:Usernames for administrator attention/holding pen"
+        //"Wikipedia:Usernames for administrator attention/Holding pen"
     };
     protected final String[] params = new String[]{
         "RemoveBlocked",
@@ -41,6 +44,9 @@ public class AIVBot extends BotThread {
         this.addJob(new GetInstructionsJob(this, toLong(0, 0, 15, 0, 0), true));
 
         for (String page : pages) {
+            if( !this.isRunning() ) {
+                break;
+            }
             this.addJob(new CheckPageJob(page, this, toLong(0, 0, 0, readRate, 0), true));
             try {
                 Thread.sleep(5000);
@@ -102,19 +108,19 @@ public class AIVBot extends BotThread {
             if (line.contains("-->")) {
                 // We're in a comment block, but it's ending
                 Matcher m = getMatcher("(.*?-->)", line);
-                if (m.matches()) {
+                if (m.find()) {
+                    remainder = m.group(1);
                     line = m.replaceAll("");
                     inComment = false;
                     commentEnd = true;
-                    remainder = m.group(1);
                 }
             }
         }
 
-        line.replaceAll("<!--.*?-->", "");
+        line = line.replaceAll("<!--.*?-->", "");
 
         Matcher m = getMatcher("<!--.*", line);
-        if (m.matches()) {
+        if (m.find()) {
             line = m.replaceAll("");
             inComment = true;
             commentStart = true;

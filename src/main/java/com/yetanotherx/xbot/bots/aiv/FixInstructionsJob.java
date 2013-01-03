@@ -28,7 +28,7 @@ public class FixInstructionsJob extends BotJob<AIVBot> {
             String content = bot.getParent().getWiki().getPageText(page);
             
             if (!content.isEmpty()) {
-                if( content.matches("===\\s*User-reported\\s*===") ) {
+                if( matches("===\\s*User-reported\\s*===", content) ) {
                     content = content.replaceAll("<!-- HagermanBot Auto-Unsigned -->", "RE-ADD-HAGERMAN"); // hell if I know...
                     
                     List<String> reportsToMove = new ArrayList<String>();
@@ -43,7 +43,7 @@ public class FixInstructionsJob extends BotJob<AIVBot> {
                         String remainder = parsed[2];
                         
                         String reg = "\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(?!(?:IP ?address|username))";
-                        if( lcMatches(reg, line) ) {
+                        if( matches(reg, line, Pattern.CASE_INSENSITIVE) ) {
                             if( inComment ) {
                                 // Something other than the example template's in the instructions
                                 // Someone done fucked up.
@@ -51,21 +51,21 @@ public class FixInstructionsJob extends BotJob<AIVBot> {
                                 reportsToMove.add(line);
                                 reportCount++;
                             }
-                        } else if( lcMatches(reg, remainder) ) {
+                        } else if( matches(reg, remainder, Pattern.CASE_INSENSITIVE) ) {
                             remainder = remainder.replace("-->", "");
                             reportsToMove.add(remainder);
                         }
                     }
                     
-                    if( getMatcher("===\\s*User-reported\\s*===\\s+<!--", content, Pattern.DOTALL).matches() ) {
+                    if( matches("===\\s*User-reported\\s*===\\s+<!--", content, Pattern.DOTALL) ) {
                         Matcher m = getMatcher("(===\\s*User-reported\\s*===\\s+)<!--.*?(-->|$)", content, Pattern.DOTALL);
-                        if(m.matches()) {
+                        if(m.find()) {
                             content = m.replaceAll(m.group(1) + bot.getInstructions());
                             message = "";
                         }
                     } else {
                         Matcher m = getMatcher("(===\\s*User-reported\\s*===\\n)", content, Pattern.DOTALL);
-                        if(m.matches()) {
+                        if(m.find()) {
                             content = m.replaceAll(m.group(1) + bot.getInstructions() + "\n");
                             message = " Old instructions not found, please check page for problems.";
                         }

@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import java.util.ArrayList;
 import com.yetanotherx.xbot.util.Util;
 import java.util.Arrays;
 import com.yetanotherx.xbot.NewWiki.User;
@@ -9,6 +10,7 @@ import com.yetanotherx.xbot.console.ChatColor;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 import static com.yetanotherx.xbot.util.RegexUtil.*;
 
 public class RemoveNameJob extends BotJob<AIVBot> {
@@ -41,7 +43,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                 List<String> newContent = new LinkedList<String>();
                 boolean inComment = false;
 
-                List<String> contentList = Arrays.asList(content.split("\n"));
+                List<String> contentList = new ArrayList<String>(Arrays.asList(content.split("\n")));
                 while (contentList.size() > 0) {
                     String line = contentList.remove(0);
 
@@ -50,7 +52,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                     String bareLine = comment[1];
                     String remainder = comment[2];
 
-                    if (inComment || !lcMatches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(?:1=|user=)?\\Q" + user + "\\E\\s*\\}\\}", line)) {
+                    if (inComment || !matches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|\\s*(?:1=|user=)?\\Q" + user + "\\E\\s*\\}\\}", line, Pattern.CASE_INSENSITIVE)) {
                         newContent.add(line);
                         if (inComment && line.equals(bareLine)) {
                             continue;
@@ -58,7 +60,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                         if (bareLine.contains("{{IPvandal|")) {
                             ipsLeft++;
                         }
-                        if (lcMatches("\\{\\{(vandal|userlinks|user-uaa)\\|", bareLine)) {
+                        if (matches("\\{\\{(vandal|userlinks|user-uaa)\\|", bareLine, Pattern.CASE_INSENSITIVE)) {
                             usersLeft++;
                         }
                     } else {
@@ -68,7 +70,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                         }
 
                         while (contentList.size() > 0
-                                && !lcMatches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|", contentList.get(0))
+                                && !matches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)\\|", contentList.get(0), Pattern.CASE_INSENSITIVE)
                                 && !contentList.get(0).startsWith("<!--")
                                 && !contentList.get(0).startsWith("=")) {
 
@@ -117,7 +119,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                 String summary = tally + " rm [[Special:Contributions/" + user + "|" + user + "]] (blocked" + length + "by [[User:" + blocker.getUsername() + "|" + blocker.getUsername() + "]] " + blockType + "). " + skipped;
                 bot.getParent().getWiki().doEdit(page, content, summary, false);
                 
-                XBotDebug.info("AIV", ChatColor.GOLD + "Removed" + ChatColor.YELLOW + user + ChatColor.GOLD + " on " + ChatColor.BLUE + page);
+                XBotDebug.info("AIV", ChatColor.GOLD + "Removed " + ChatColor.YELLOW + user + ChatColor.GOLD + " on " + ChatColor.BLUE + page);
             }
 
         } catch (IOException ex) {

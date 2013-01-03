@@ -55,7 +55,7 @@ public abstract class BotJob<T extends BotThread> extends Thread {
         this.enabled = true;
         
         try {
-            while (!bot.isEnabled()) {
+            while (!bot.isEnabled() ) {
                 //Wait until bot starts running
                 Thread.sleep(50);
             }

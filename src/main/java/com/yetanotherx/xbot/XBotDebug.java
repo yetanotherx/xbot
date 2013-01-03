@@ -16,11 +16,7 @@ public class XBotDebug {
 
     public static void debug(String name, String message) {
         if (debugMode) {
-            if( ChatColor.isColored(message) ) {
-                logger.info("[" + name + " Debug] - " + message);
-            } else {
-                logger.info("[" + name + " Debug] - " + ChatColor.DARK_GRAY + message);
-            }
+            logger.info("[" + name + " Debug] - " + ChatColor.DARK_GRAY + message);
         }
     }
     
@@ -37,11 +33,7 @@ public class XBotDebug {
     }
     
     public static void warn(String name, String message, Throwable ex) {
-        if( ChatColor.isColored(message) ) {
-            logger.log(Level.WARNING, "[" + name + "] - " + message, ex);
-        } else {
-            logger.log(Level.WARNING, "[" + name + "] - " + ChatColor.YELLOW + message, ex);
-        }
+        logger.log(Level.WARNING, "[" + name + "] - " + ChatColor.YELLOW + message, ex);
     }
     
     public static void warn(String name, String message) {
@@ -53,11 +45,7 @@ public class XBotDebug {
     }
     
     public static void error(String name, String message, Throwable ex) {
-        if( ChatColor.isColored(message) ) {
-            logger.log(Level.SEVERE, "[" + name + "] - " + message, ex);
-        } else {
-            logger.log(Level.SEVERE, "[" + name + "] - " + ChatColor.RED + message, ex);
-        }
+        logger.log(Level.SEVERE, "[" + name + "] - " + ChatColor.RED + message, ex);
     }
     
     public static void error(String name, String message) {

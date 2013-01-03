@@ -4173,7 +4173,8 @@ public class NewWiki implements Serializable
         if (!user.isEmpty())
         {
             urlBase.append("&bkusers=");
-            urlBase.append(user);
+            // XBot - urlBase.append(user);
+            urlBase.append(URLEncoder.encode(normalize(user), "UTF-8"));
         }
         urlBase.append("&bklimit=");
         urlBase.append(amount < max ? amount : max);

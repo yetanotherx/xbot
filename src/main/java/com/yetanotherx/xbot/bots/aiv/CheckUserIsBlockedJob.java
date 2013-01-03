@@ -28,7 +28,7 @@ public class CheckUserIsBlockedJob extends BotJob<AIVBot> {
             if( logs.length > 0 ) { // should never be >1
                 // User is blocked
                 LogEntry log = logs[0];
-                if( !log.getType().equals("BLOCK_LOG") ) {
+                if( !log.getType().equals("block") ) {
                     return; // WTF???
                 }
                 
