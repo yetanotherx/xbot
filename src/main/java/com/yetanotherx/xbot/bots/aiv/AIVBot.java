@@ -1,9 +1,11 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import java.util.ArrayList;
 import com.yetanotherx.xbot.XBot;
 import com.yetanotherx.xbot.bots.BotThread;
 import static com.yetanotherx.xbot.util.RegexUtil.getMatcher;
 import static com.yetanotherx.xbot.util.Util.toLong;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -27,8 +29,8 @@ public class AIVBot extends BotThread {
     };
     private final String version = "2.0.23";
     private String instructions = "";
-    private Map<String, String> ips;
-    private List<String> categories;
+    private Map<String, String> ips = new HashMap<String, String>();
+    private List<String> categories = new ArrayList<String>();
 
     public AIVBot(XBot main, String name) {
         super(main, name);

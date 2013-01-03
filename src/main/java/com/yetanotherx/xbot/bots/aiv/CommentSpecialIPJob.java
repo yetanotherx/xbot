@@ -29,6 +29,7 @@ public class CommentSpecialIPJob extends BotJob<AIVBot> {
     public void doRun() {
         try {
             String content = bot.getParent().getWiki().getPageText(page);
+            String originalContent = content.toString();
 
             if (!content.isEmpty()) {
                 List<String> newContent = new LinkedList<String>();
@@ -36,7 +37,7 @@ public class CommentSpecialIPJob extends BotJob<AIVBot> {
 
                 for (String line : content.split("\n")) {
                     inComment = Boolean.parseBoolean(AIVBot.parseComment(line, inComment)[0]);
-                    
+
                     if (line.contains(user) && matches("\\{\\{((?:ip)?vandal|userlinks|user-uaa)", line, Pattern.CASE_INSENSITIVE)) {
                         if (line.contains("<!-- Marked -->")) {
                             return;
@@ -58,9 +59,14 @@ public class CommentSpecialIPJob extends BotJob<AIVBot> {
 
                 String newCont = Util.join("\n", newContent);
                 if (!newCont.isEmpty()) {
-                    this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false);
+                    if (!originalContent.equals(bot.getParent().getWiki().getPageText(page))) {
+                        XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
+                        return;
+                    } else {
+                        this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false);
+                    }
                 }
-                
+
                 XBotDebug.info("AIV", ChatColor.GOLD + user + " matched " + mask + ", marked as: " + bot.getIPs().get(mask));
             }
         } catch (IOException ex) {

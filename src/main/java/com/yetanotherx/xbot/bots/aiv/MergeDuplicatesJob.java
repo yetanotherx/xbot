@@ -28,6 +28,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
     public void doRun() {
         try {
             String content = bot.getParent().getWiki().getPageText(page);
+            String originalContent = content.toString();
 
             if (!content.isEmpty()) {
                 List<String> newContent = new LinkedList<String>();
@@ -93,7 +94,12 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
 
                 String newCont = Util.join("\n", newContent);
                 if (!newCont.isEmpty()) {
-                    this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false);
+                    if (!originalContent.equals(bot.getParent().getWiki().getPageText(page))) {
+                        XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
+                        return;
+                    } else {
+                        this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false);
+                    }
                 }
 
                 XBotDebug.info("AIV", ChatColor.GOLD + " Duplicates merged on " + ChatColor.BLUE + page);

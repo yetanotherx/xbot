@@ -34,7 +34,8 @@ public class RemoveNameJob extends BotJob<AIVBot> {
     public void doRun() {
         try {
             String content = bot.getParent().getWiki().getPageText(page);
-
+            String originalContent = content.toString();
+            
             if (!content.isEmpty()) {
                 int ipsLeft = 0;
                 int usersLeft = 0;
@@ -82,43 +83,47 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                         }
                     }
                 }
-                
+
                 content = Util.join("\n", newContent);
-                if( !found || content.isEmpty() ) {
+                if (!found || content.isEmpty()) {
                     return;
                 }
-                
+
                 String length = " ";
-                if( !duration.isEmpty() ) {
-                    if( duration.equals("indef") ) {
+                if (!duration.isEmpty()) {
+                    if (duration.equals("indef")) {
                         length = " indef ";
                     } else {
                         length = " " + duration;
                     }
                 }
-                
+
                 String tally = "Empty.";
-                if( ipsLeft != 0 || usersLeft != 0 ) {
+                if (ipsLeft != 0 || usersLeft != 0) {
                     String ipNote = ipsLeft + " IP" + ((ipsLeft != 1) ? "s" : "");
                     String userNote = usersLeft + " user" + ((usersLeft != 1) ? "s" : "");
-                    
-                    if( usersLeft == 0 ) { // Only IPs left
+
+                    if (usersLeft == 0) { // Only IPs left
                         tally = ipsLeft + " left.";
-                    } else if( ipsLeft == 0 ) { // Only users left
+                    } else if (ipsLeft == 0) { // Only users left
                         tally = usersLeft + " left.";
                     } else { // Users and ips left
                         tally = ipsLeft + " & " + usersLeft + " left.";
                     }
                 }
-                
+
                 String skipped = "";
-                if( linesSkipped > 0 ) {
+                if (linesSkipped > 0) {
                     skipped = " " + linesSkipped + " comment(s) removed.";
                 }
-                
+
                 String summary = tally + " rm [[Special:Contributions/" + user + "|" + user + "]] (blocked" + length + "by [[User:" + blocker.getUsername() + "|" + blocker.getUsername() + "]] " + blockType + "). " + skipped;
-                bot.getParent().getWiki().doEdit(page, content, summary, false);
-                
+                if (!originalContent.equals(bot.getParent().getWiki().getPageText(page))) {
+                    XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
+                    return;
+                } else {
+                    bot.getParent().getWiki().doEdit(page, content, summary, false);
+                }
                 XBotDebug.info("AIV", ChatColor.GOLD + "Removed " + ChatColor.YELLOW + user + ChatColor.GOLD + " on " + ChatColor.BLUE + page);
             }
 
