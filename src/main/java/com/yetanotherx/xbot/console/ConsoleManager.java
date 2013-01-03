@@ -133,27 +133,12 @@ public class ConsoleManager {
      * @return 
      */
     public String colorize(String string) {
-        if (!string.contains("\u00A7")) {
+        if (!ChatColor.isColored(string)) {
             return string;
         } else if (!jline || !reader.getTerminal().isANSISupported()) {
             return ChatColor.strip(string);
         } else {
-            return string.replace(ChatColor.RED.toString(), "\033[1;31m")
-                    .replace(ChatColor.YELLOW.toString(), "\033[1;33m")
-                    .replace(ChatColor.BRIGHT_GREEN.toString(), "\033[1;32m")
-                    .replace(ChatColor.CYAN.toString(), "\033[1;36m")
-                    .replace(ChatColor.BLUE.toString(), "\033[1;34m")
-                    .replace(ChatColor.PINK.toString(), "\033[1;35m")
-                    .replace(ChatColor.BLACK.toString(), "\033[0;0m")
-                    .replace(ChatColor.DARK_GRAY.toString(), "\033[1;30m")
-                    .replace(ChatColor.DARK_RED.toString(), "\033[0;31m")
-                    .replace(ChatColor.GOLD.toString(), "\033[0;33m")
-                    .replace(ChatColor.DARK_GREEN.toString(), "\033[0;32m")
-                    .replace(ChatColor.DARK_CYAN.toString(), "\033[0;36m")
-                    .replace(ChatColor.DARK_BLUE.toString(), "\033[0;34m")
-                    .replace(ChatColor.PURPLE.toString(), "\033[0;35m")
-                    .replace(ChatColor.GRAY.toString(), "\033[0;37m")
-                    .replace(ChatColor.WHITE.toString(), "\033[1;37m") + "\033[0m";
+            return ChatColor.getANSIString(string + ChatColor.RESET);
         }
     }
 
