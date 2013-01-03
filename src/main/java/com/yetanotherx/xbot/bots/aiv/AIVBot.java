@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-/**
- * TODO: Runpage
- */
 public class AIVBot extends BotThread {
 
     protected final int readRate = 30;
@@ -19,7 +16,7 @@ public class AIVBot extends BotThread {
         "Wikipedia:Administrator intervention against vandalism/TB2",
         "Wikipedia:Usernames for administrator attention",
         "Wikipedia:Usernames for administrator attention/Bot",
-        //"Wikipedia:Usernames for administrator attention/Holding pen"
+        "Wikipedia:Usernames for administrator attention/Holding pen"
     };
     protected final String[] params = new String[]{
         "RemoveBlocked",
@@ -44,7 +41,7 @@ public class AIVBot extends BotThread {
         this.addJob(new GetInstructionsJob(this, toLong(0, 0, 15, 0, 0), true));
 
         for (String page : pages) {
-            if( !this.isRunning() ) {
+            if (!this.isRunning()) {
                 break;
             }
             this.addJob(new CheckPageJob(page, this, toLong(0, 0, 0, readRate, 0), true));
@@ -135,5 +132,10 @@ public class AIVBot extends BotThread {
             tally = reportCount + " report" + (reportCount == 1 ? "" : "s") + " remaining. ";
         }
         return tally;
+    }
+
+    @Override
+    public String getRunPage() {
+        return "User:X!/run/AIV";
     }
 }

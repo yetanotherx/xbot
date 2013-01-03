@@ -1,5 +1,7 @@
 package com.yetanotherx.xbot.bots;
 
+import com.yetanotherx.xbot.XBotDebug;
+
 /**
  * Individual jobs run by a bot thread
  * 
@@ -61,7 +63,11 @@ public abstract class BotJob<T extends BotThread> extends Thread {
             }
             
             while (running) {
-                this.doRun();
+                try {
+                    this.doRun();
+                } catch( Exception e ) {
+                    XBotDebug.error(bot.getRealName(), "Uncaught exception running job " + getClass().getCanonicalName() + "!", e);
+                }
                 
                 if( !repeat ) {
                     break;

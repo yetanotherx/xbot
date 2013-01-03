@@ -4,8 +4,6 @@ import com.yetanotherx.xbot.console.ChatColor;
 import com.yetanotherx.xbot.util.RegexUtil;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 import javax.security.auth.login.FailedLoginException;
 
@@ -13,9 +11,7 @@ public class XBotWiki extends NewWiki {
 
     private static final long serialVersionUID = 7139487259719L;
     private XBot parent;
-    private final Queue<Edit> toWrite = new ConcurrentLinkedQueue<Edit>();
-    private boolean enableWriteThrottling = false; // TODO: overwrites true;
-    private WriteArticleThread writeThread = new WriteArticleThread();
+    private boolean enableWriteThrottling = false;
 
     public XBotWiki(XBot parent, String domain, String scriptPath) {
         super(domain, scriptPath);
@@ -45,17 +41,26 @@ public class XBotWiki extends NewWiki {
             XBotDebug.error("Wiki", "IP exception gotten. Is the wiki down?", e);
             throw new RuntimeException("Received a login error.", e);
         }
-
-        writeThread.start();
     }
-    
+
+    public boolean checkRunpage(String page) {
+        try {
+            String text = this.parent.getWiki().getPageText(page);
+            if (!text.toLowerCase().trim().matches("(yes|run|enable|go)")) {
+                XBotDebug.error("Wiki", "Bot disabled via " + page + "!");
+                return false;
+            }
+        } catch (IOException ex) {
+        }
+        return true;
+    }
+
     public void login(String user, String pass) throws IOException, FailedLoginException {
         XBotDebug.info("Wiki", ChatColor.PINK + "Logging in to " + this.getDomain() + " as " + user);
         super.login(user.trim(), pass.trim().toCharArray());
     }
-    
+
     public void shutdown() {
-        this.writeThread.interrupt();
     }
 
     private void setParams() {
@@ -71,44 +76,43 @@ public class XBotWiki extends NewWiki {
         this.setMaxLag(this.parent.getConf().getMaxlag());
         this.setResolveRedirects(true);
 
-        if (this.parent.getConf().getEditRate() <= 0) {
-            this.setThrottle(0);
-        } else {
-            this.setThrottle(60000 / this.parent.getConf().getEditRate());
-        }
+        this.setThrottle(0);
 
         this.setUserAgent("XBot v" + XBot.getVersion() + " using MER-C's Wiki.java");
         this.setUsingCompressedRequests(true);
     }
 
     public synchronized void doEdit(String title, String text, String summary, boolean minor) {
-        if( parent.getConf().doFollowNoBots() && this.failsNoBots(text) ) {
+        if (parent.getConf().doFollowNoBots() && this.failsNoBots(text)) {
             XBotDebug.warn("Wiki", "Could not write to " + title + ": Failed the {{nobots}} check.");
             return;
         }
-        
+
         Edit e = new Edit(title, text, summary, minor);
+        this.runEdit(e);
         if (this.enableWriteThrottling) {
-            this.toWrite.add(e);
-        } else {
-            this.runEdit(e);
+            if (this.parent.getConf().getEditRate() > 0) {
+                try {
+                    Thread.sleep(60000 / this.parent.getConf().getEditRate());
+                } catch (InterruptedException ex) {
+                }
+            }
         }
     }
-    
+
     private void runEdit(Edit edit) {
         String title = edit.title;
         String text = edit.text;
         String summary = edit.summary;
         boolean minor = edit.minor;
-        
+
         try {
-            // TODO: Configure per bot
             super.edit(title, text, summary, minor, isMarkBot(), -2, null);
         } catch (Exception ex) {
             XBotDebug.error("Wiki", "Error writing to " + title, ex);
         }
     }
-    
+
     private boolean failsNoBots(String text) {
         return RegexUtil.matches("(?si).*\\{\\{(nobots|bots\\|(allow=none|deny=(.*?" + parent.getConf().getUsername() + ".*?|all)|optout=all))\\}\\}.*", text, Pattern.CASE_INSENSITIVE);
     }
@@ -130,16 +134,6 @@ public class XBotWiki extends NewWiki {
         parent.getMonitor().newAPICall();
         return super.post(url, text, caller);
     }
-    
-    public synchronized void writeAllPending() {
-        for (Edit e : this.toWrite) {
-            this.runEdit(e);
-        }
-    }
-
-    public synchronized Queue<Edit> getPending() {
-        return this.toWrite;
-    }
 
     public boolean doEnableWriteThrottling() {
         return enableWriteThrottling;
@@ -147,28 +141,6 @@ public class XBotWiki extends NewWiki {
 
     public void setEnableWriteThrottling(boolean enableWriteThrottling) {
         this.enableWriteThrottling = enableWriteThrottling;
-    }
-
-    private class WriteArticleThread extends Thread {
-
-        public void run() {
-            while (!this.isInterrupted()) {
-                Edit nextArticle;
-                synchronized (toWrite) {
-                    nextArticle = toWrite.poll();
-                }
-
-                if (nextArticle != null) {
-                    runEdit(nextArticle);
-                }
-
-                try {
-                    Thread.sleep(60000 / parent.getConf().getEditRate());
-                } catch (InterruptedException ex) {
-                    break;
-                }
-            }
-        }
     }
 
     public static class Edit {

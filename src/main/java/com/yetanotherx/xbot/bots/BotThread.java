@@ -3,7 +3,6 @@ package com.yetanotherx.xbot.bots;
 import com.yetanotherx.xbot.XBot;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.console.ChatColor;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +36,7 @@ public abstract class BotThread extends Thread {
      * is active. (this is not set during shutdown, while enabled is)
      */
     private boolean running = false;
-
+    
     public BotThread(XBot main, String name) {
         this.parent = main;
         this.setName(getName() + "-" + name);
@@ -109,6 +108,8 @@ public abstract class BotThread extends Thread {
     public abstract void doRun();
 
     public abstract void doShutdown();
+    
+    public abstract String getRunPage();
 
     /**
      * Adds a job to the thread, and starts it.
@@ -131,14 +132,10 @@ public abstract class BotThread extends Thread {
         return name;
     }
     
-    public void checkRunpage(String page) {
-        try {
-            String text = this.parent.getWiki().getPageText(page);
-            if( !text.toLowerCase().trim().matches("(yes|run|enable|go)") ) {
-                XBotDebug.error(getRealName(), "Bot disabled via " + page + "! Shutting down!");
-                this.parent.disableBot(this);
-            }
-        } catch (IOException ex) {
+    protected void edit(String title, String text, String summary, boolean minor) {
+        if( getRunPage() != null && parent.getWiki().checkRunpage(getRunPage()) ) {
+            XBotDebug.error("Wiki", "Could not write to " + title + ": Bot disabled via " + getRunPage());
+            return;
         }
     }
 

@@ -23,7 +23,6 @@ public class ServerShutdownThread extends Thread {
             bot.disable();
         }
 
-        main.getWiki().writeAllPending();
         main.getWiki().shutdown();
 
         main.getMonitor().disable();

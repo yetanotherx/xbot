@@ -76,7 +76,6 @@ import javax.security.auth.login.LoginException;
  *  @author MER-C and contributors
  *  @version 0.27
  * 
- * TODO: Set config
  */
 public class NewWiki implements Serializable
 {

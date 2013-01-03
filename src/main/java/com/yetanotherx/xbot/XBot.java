@@ -23,9 +23,6 @@ import java.util.Map.Entry;
 /**
  * Controller for XBot. Manages various Bot threads, console, commands, etc.
  * 
- * TODO: Use events
- * TODO: Don't hardcode bots
- * 
  * @author yetanotherx
  */
 public class XBot {

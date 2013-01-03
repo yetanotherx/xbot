@@ -4,7 +4,6 @@ import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.XBot;
 import com.yetanotherx.xbot.bots.BotThread;
 import com.yetanotherx.xbot.console.ChatColor;
-import static com.yetanotherx.xbot.util.Util.toLong;
 
 public class ExampleBot extends BotThread {
 
@@ -41,6 +40,11 @@ public class ExampleBot extends BotThread {
             this.addJob(new PostResultsJob(this, 0, false));
         }
         this.sandbox = sandbox;
+    }
+
+    @Override
+    public String getRunPage() {
+        return null;
     }
 
     

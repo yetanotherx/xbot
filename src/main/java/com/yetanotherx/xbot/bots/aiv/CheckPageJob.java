@@ -111,10 +111,10 @@ public class CheckPageJob extends BotJob<AIVBot> {
 
                         if (!merged && params.get("AutoMark").equals("on") && !line.contains("<!-- Marked -->")) {
                             for (String mask : bot.getIPs().keySet()) {
-                                if (mask.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}") && InetAddresses.isInetAddress(user)) {
+                                if (mask.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}") && InetAddresses.isInetAddress(user) && user.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
                                     SubnetUtils subnet = new SubnetUtils(mask);
                                     subnet.setInclusiveHostCount(true);
-                                    if (subnet.getInfo().isInRange(user)) {
+                                    if (subnet.getInfo().isInRange(user)) { // TODO: IPv6
                                         ipCommentsNeeded.add(Arrays.asList(new String[]{page, user, mask}));
                                         break;
                                     }
