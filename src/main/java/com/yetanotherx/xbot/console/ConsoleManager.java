@@ -58,8 +58,8 @@ public class ConsoleManager {
         
         fileHandler = new RotatingFileHandler(logFile);
 
-        consoleHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss")));
-        fileHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")));
+        consoleHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("HH:mm:ss"), false));
+        fileHandler.setFormatter(new DateOutputFormatter(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"), true));
 
         Logger logger = Logger.getLogger("");
         for (Handler h : logger.getHandlers()) {
@@ -274,9 +274,11 @@ public class ConsoleManager {
     private class DateOutputFormatter extends Formatter {
 
         private final SimpleDateFormat date;
+        private final boolean file;
 
-        public DateOutputFormatter(SimpleDateFormat date) {
+        public DateOutputFormatter(SimpleDateFormat date, boolean file) {
             this.date = date;
+            this.file = file;
         }
 
         @Override
@@ -290,7 +292,12 @@ public class ConsoleManager {
             builder.append(" [");
             builder.append(record.getLevel().getLocalizedName().toUpperCase());
             builder.append("] ");
-            builder.append(colorize(formatMessage(record).trim()));
+            
+            if (file) {
+                builder.append(ChatColor.strip(formatMessage(record).trim()));
+            } else {
+                builder.append(colorize(formatMessage(record).trim()));
+            }
             builder.append('\n');
 
             if (record.getThrown() != null) {
