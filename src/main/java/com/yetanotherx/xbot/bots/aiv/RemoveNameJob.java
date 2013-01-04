@@ -104,11 +104,11 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                     String userNote = usersLeft + " user" + ((usersLeft != 1) ? "s" : "");
 
                     if (usersLeft == 0) { // Only IPs left
-                        tally = ipsLeft + " left.";
+                        tally = ipNote + " left.";
                     } else if (ipsLeft == 0) { // Only users left
-                        tally = usersLeft + " left.";
+                        tally = userNote + " left.";
                     } else { // Users and ips left
-                        tally = ipsLeft + " & " + usersLeft + " left.";
+                        tally = ipNote + " & " + userNote + " left.";
                     }
                 }
 
