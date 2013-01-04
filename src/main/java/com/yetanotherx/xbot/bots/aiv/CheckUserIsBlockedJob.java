@@ -53,7 +53,7 @@ public class CheckUserIsBlockedJob extends BotJob<AIVBot> {
                     long timeStampMS = log.getTimestamp().getTimeInMillis();
                     long expiryMS = Util.dateToLong(expiryDate);
                     
-                    Period period = new Period(timeStampMS, expiryMS + 1);
+                    Period period = new Period(Util.roundLong(timeStampMS), Util.roundLong(expiryMS));
                     duration = Util.periodFormatter.print(period) + " ";
                 }
                 

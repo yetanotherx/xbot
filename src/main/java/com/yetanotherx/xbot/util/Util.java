@@ -14,7 +14,16 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 public class Util {
 
-    public final static PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendWeeks().appendSuffix(" weeks, ").appendDays().appendSuffix(" days, ").appendHours().appendSuffix(" hours, ").appendMinutes().appendSuffix(" minutes, ").appendSeconds().appendSuffix(" seconds").printZeroNever().toFormatter();
+    public final static PeriodFormatter periodFormatter = new PeriodFormatterBuilder()
+            .printZeroRarelyLast()
+            .appendYears().appendSuffix(" year", " years").appendSeparator(", ")
+            .appendMonths().appendSuffix(" month", " months").appendSeparator(", ")
+            .appendWeeks().appendSuffix(" week", " weeks").appendSeparator(", ")
+            .appendDays().appendSuffix(" day", " days").appendSeparator(", ")
+            .appendHours().appendSuffix(" hour", " hours").appendSeparator(", ")
+            .appendMinutes().appendSuffix(" minute", " minutes").appendSeparator(", ")
+            .appendSeconds().appendSuffix(" second", " seconds")
+            .toFormatter();
 
     /**
      * Converts the given number of days/hours/minutes/seconds/millis
@@ -89,5 +98,9 @@ public class Util {
     
     public static long dateToLong(int[] date) {
         return new DateTime(date[0], date[1], date[2], date[3], date[4], date[5]).getMillis();
+    }
+    
+    public static long roundLong(long l) {
+        return (l / 1000) * 1000;
     }
 }
