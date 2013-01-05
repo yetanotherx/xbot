@@ -30,9 +30,11 @@ public class MonitorCommands extends CommandContainer {
         MonitorThread mon = parent.getMonitor();
 
         XBotDebug.info("MAIN", ChatColor.YELLOW + "XBot Information");
-        XBotDebug.info("MAIN", ChatColor.GRAY + " Number of bots: " + mon.getBotCount());
+        XBotDebug.info("MAIN", ChatColor.GRAY + " Number of running bots: " + mon.getBotCount());
+        XBotDebug.info("MAIN", ChatColor.GRAY + " Number of running jobs: " + mon.getJobCount());
+        XBotDebug.info("MAIN", ChatColor.GRAY + " Number of bots: " + mon.getAllBotCount());
+        XBotDebug.info("MAIN", ChatColor.GRAY + " Number of jobs: " + mon.getAllJobCount());
         XBotDebug.info("MAIN", ChatColor.GRAY + " Number of threads: " + mon.getThreadCount());
-        XBotDebug.info("MAIN", ChatColor.GRAY + " Number of jobs: " + mon.getJobCount());
         XBotDebug.info("MAIN", ChatColor.GRAY + " Total memory used: " + mon.getMemory()[0]);
         XBotDebug.info("MAIN", ChatColor.GRAY + " Free memory: " + mon.getMemory()[1]);
         XBotDebug.info("MAIN", ChatColor.GRAY + " Max memory: " + mon.getMemory()[2]);
@@ -51,13 +53,15 @@ public class MonitorCommands extends CommandContainer {
     public void bots(CommandContext args) throws CommandException {
         MonitorThread mon = parent.getMonitor();
 
-        XBotDebug.info("MAIN", ChatColor.GOLD + " Number of bots running: " + ChatColor.BRIGHT_GREEN + mon.getBotCount());
+        XBotDebug.info("MAIN", ChatColor.GOLD + " Number of bots running: " + ChatColor.BRIGHT_GREEN + mon.getAllBotCount() + ChatColor.GOLD + " (" + ChatColor.BRIGHT_GREEN + mon.getBotCount() + ChatColor.GOLD + " running)");
 
         for (BotThread bot : parent.getBots()) {
             if (!bot.isEnabled()) {
-                continue;
+                XBotDebug.info("MAIN", ChatColor.YELLOW + "   " + bot.getRealName() + ChatColor.CYAN + " (" + bot.getClass().getCanonicalName() + ")");
+            } else {
+                XBotDebug.info("MAIN", ChatColor.YELLOW + "   " + bot.getRealName() + ChatColor.CYAN + " (" + bot.getClass().getCanonicalName() + ") " + ChatColor.YELLOW + " - " + ChatColor.PINK + " RUNNING");
             }
-            XBotDebug.info("MAIN", ChatColor.YELLOW + "   " + bot.getRealName() + ChatColor.CYAN + " (" + bot.getClass().getCanonicalName() + ")");
+            
         }
     }
 
@@ -78,13 +82,10 @@ public class MonitorCommands extends CommandContainer {
     public void jobs(CommandContext args) throws CommandException {
         MonitorThread mon = parent.getMonitor();
 
-        XBotDebug.info("MAIN", ChatColor.GOLD + " Number of jobs running: " + ChatColor.BRIGHT_GREEN + mon.getJobCount());
+        XBotDebug.info("MAIN", ChatColor.GOLD + " Number of jobs running: " + ChatColor.BRIGHT_GREEN + mon.getAllJobCount() + ChatColor.GOLD + " (" + ChatColor.BRIGHT_GREEN + mon.getJobCount() + ChatColor.GOLD + " running)");
 
         for (BotThread bot : parent.getBots()) {
             for (BotJob<? extends BotThread> job : bot.getJobs()) {
-                if (!job.isEnabled()) {
-                    continue;
-                }
                 StringBuilder b = new StringBuilder();
                 b.append(ChatColor.YELLOW);
                 b.append("   ");
@@ -92,7 +93,15 @@ public class MonitorCommands extends CommandContainer {
                 b.append(ChatColor.CYAN);
                 b.append(" (");
                 b.append(bot.getName());
-                b.append(")");
+                b.append(") ");
+                
+                if (job.isEnabled()) {
+                    b.append(ChatColor.YELLOW);
+                    b.append(" - ");
+                    b.append(ChatColor.PINK);
+                    b.append(" RUNNING");
+                }
+                
                 XBotDebug.info("MAIN", b.toString());
             }
 

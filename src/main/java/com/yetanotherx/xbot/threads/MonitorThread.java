@@ -81,6 +81,10 @@ public class MonitorThread extends Thread {
         }
         return count;
     }
+    
+    public synchronized int getAllBotCount() {
+        return bot.getBots().size();
+    }
 
     public int getThreadCount() {
         return Thread.getAllStackTraces().size();
@@ -97,6 +101,16 @@ public class MonitorThread extends Thread {
                 if (ijob.isEnabled()) {
                     count++;
                 }
+            }
+        }
+        return count;
+    }
+    
+    public synchronized int getAllJobCount() {
+        int count = 0;
+        for (BotThread ibot : bot.getBots()) {
+            for (BotJob<? extends BotThread> ijob : ibot.getJobs()) {
+                count++;
             }
         }
         return count;
