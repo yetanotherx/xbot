@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import java.util.Calendar;
 import java.util.ArrayList;
 import com.yetanotherx.xbot.util.Util;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
         try {
             String content = bot.getParent().getWiki().getPageText(page);
             String originalContent = content.toString();
+            Calendar time = bot.getParent().getWiki().getTimestamp();
             
             if (!content.isEmpty()) {
                 int ipsLeft = 0;
@@ -119,7 +121,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
 
                 String summary = tally + " rm [[Special:Contributions/" + user + "|" + user + "]] (blocked" + length + "by [[User:" + blocker.getUsername() + "|" + blocker.getUsername() + "]] " + blockType + "). " + skipped;
                 if (!originalContent.equals(bot.getParent().getWiki().getPageText(page))) {
-                    XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
+                    XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.", time);
                     return;
                 } else {
                     bot.getParent().getWiki().doEdit(page, content, summary, false);

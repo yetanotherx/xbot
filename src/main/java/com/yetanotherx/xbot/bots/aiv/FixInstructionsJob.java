@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import java.util.Calendar;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.console.ChatColor;
@@ -27,6 +28,7 @@ public class FixInstructionsJob extends BotJob<AIVBot> {
             String summary = "";
             String content = bot.getParent().getWiki().getPageText(page);
             String originalContent = content.toString();
+            Calendar time = bot.getParent().getWiki().getTimestamp();
 
             if (!content.isEmpty()) {
                 if (matches("===\\s*User-reported\\s*===", content)) {
@@ -97,7 +99,7 @@ public class FixInstructionsJob extends BotJob<AIVBot> {
                         XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                         return;
                     } else {
-                        bot.getParent().getWiki().doEdit(page, content, summary, false);
+                        bot.getParent().getWiki().doEdit(page, content, summary, false, time);
                     }
                     XBotDebug.info("AIV", ChatColor.YELLOW + "Reset instruction block on " + page);
 
@@ -108,7 +110,7 @@ public class FixInstructionsJob extends BotJob<AIVBot> {
                             XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                             return;
                         } else {
-                            bot.getParent().getWiki().doEdit(page, content + "<!-- HBC AIV helperbot WARNING -->\n", "WARNING: User-reported header not found!", false);
+                            bot.getParent().getWiki().doEdit(page, content + "<!-- HBC AIV helperbot WARNING -->\n", "WARNING: User-reported header not found!", false, time);
                         }
                     }
                 }

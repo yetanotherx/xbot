@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import java.util.Calendar;
 import java.util.ArrayList;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
@@ -29,6 +30,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
         try {
             String content = bot.getParent().getWiki().getPageText(page);
             String originalContent = content.toString();
+            Calendar time = bot.getParent().getWiki().getTimestamp();
 
             if (!content.isEmpty()) {
                 List<String> newContent = new LinkedList<String>();
@@ -98,7 +100,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
                         XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                         return;
                     } else {
-                        this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false);
+                        this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false, time);
                     }
                 }
 

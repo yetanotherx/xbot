@@ -3,6 +3,7 @@ package com.yetanotherx.xbot;
 import com.yetanotherx.xbot.console.ChatColor;
 import com.yetanotherx.xbot.util.RegexUtil;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.security.auth.login.FailedLoginException;
@@ -63,6 +64,12 @@ public class XBotWiki extends NewWiki {
     public void shutdown() {
     }
 
+    public Calendar getTimestamp() {
+        Calendar c = this.makeCalendar();
+        c.setTimeInMillis(System.currentTimeMillis());
+        return c;
+    }
+
     private void setParams() {
         int mask = NewWiki.ASSERT_LOGGED_IN;
         if (this.parent.getConf().doCheckTalk()) {
@@ -82,13 +89,13 @@ public class XBotWiki extends NewWiki {
         this.setUsingCompressedRequests(true);
     }
 
-    public synchronized void doEdit(String title, String text, String summary, boolean minor) {
+    public synchronized void doEdit(String title, String text, String summary, boolean minor, Calendar timestamp) {
         if (parent.getConf().doFollowNoBots() && this.failsNoBots(text)) {
             XBotDebug.warn("Wiki", "Could not write to " + title + ": Failed the {{nobots}} check.");
             return;
         }
 
-        Edit e = new Edit(title, text, summary, minor);
+        Edit e = new Edit(title, text, summary, minor, timestamp);
         this.runEdit(e);
         if (this.enableWriteThrottling) {
             if (this.parent.getConf().getEditRate() > 0) {
@@ -100,6 +107,10 @@ public class XBotWiki extends NewWiki {
         }
     }
 
+    public synchronized void doEdit(String title, String text, String summary, boolean minor) {
+        this.doEdit(title, text, summary, minor, null);
+    }
+
     private void runEdit(Edit edit) {
         String title = edit.title;
         String text = edit.text;
@@ -107,7 +118,7 @@ public class XBotWiki extends NewWiki {
         boolean minor = edit.minor;
 
         try {
-            super.edit(title, text, summary, minor, isMarkBot(), -2, null);
+            super.edit(title, text, summary, minor, isMarkBot(), -2, edit.timestamp);
         } catch (Exception ex) {
             XBotDebug.error("Wiki", "Error writing to " + title, ex);
         }
@@ -147,12 +158,14 @@ public class XBotWiki extends NewWiki {
 
         public final String title, text, summary;
         public final boolean minor;
+        public final Calendar timestamp;
 
-        public Edit(String title, String text, String summary, boolean minor) {
+        public Edit(String title, String text, String summary, boolean minor, Calendar timestamp) {
             this.title = title;
             this.text = text;
             this.summary = summary;
             this.minor = minor;
+            this.timestamp = timestamp;
         }
     }
 }
