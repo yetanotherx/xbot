@@ -121,10 +121,10 @@ public class RemoveNameJob extends BotJob<AIVBot> {
 
                 String summary = tally + " rm [[Special:Contributions/" + user + "|" + user + "]] (blocked" + length + "by [[User:" + blocker.getUsername() + "|" + blocker.getUsername() + "]] " + blockType + "). " + skipped;
                 if (!originalContent.equals(bot.getParent().getWiki().getPageText(page))) {
-                    XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.", time);
+                    XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                     return;
                 } else {
-                    bot.getParent().getWiki().doEdit(page, content, summary, false);
+                    bot.getParent().getWiki().doEdit(page, content, summary, false, time);
                 }
                 XBotDebug.info("AIV", ChatColor.GOLD + "Removed " + ChatColor.YELLOW + user + ChatColor.GOLD + " on " + ChatColor.BLUE + page);
             }
