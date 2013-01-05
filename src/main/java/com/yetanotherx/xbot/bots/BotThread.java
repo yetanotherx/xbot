@@ -116,6 +116,7 @@ public abstract class BotThread extends Thread {
      * @param job 
      */
     public synchronized void addJob(BotJob<? extends BotThread> job) {
+        //XBotDebug.info("Adding job " + job.getClass().getCanonicalName());
         jobs.add(job);
         job.start();
     }

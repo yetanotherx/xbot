@@ -4,7 +4,9 @@ import com.yetanotherx.xbot.XBot;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.bots.BotThread;
+import com.yetanotherx.xbot.console.ChatColor;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MonitorThread extends Thread {
@@ -22,9 +24,39 @@ public class MonitorThread extends Thread {
     public void run() {
         this.enabled = true;
 
+        int updateCount = 0;
         while (this.isEnabled()) {
             try {
-                // Database calls / minute
+                if( updateCount > 500 ) {
+                    XBotDebug.info("Monitor", ChatColor.CYAN + "Cleaning out old jobs...");
+                    updateCount = 0;
+                    
+                    int jobsRemoved = 0;
+                    int botsRemoved = 0;
+                    
+                    Iterator<BotThread> biter = bot.getBots().iterator();
+                    while(biter.hasNext()) {
+                        BotThread t = biter.next();
+                        
+                        Iterator<BotJob<? extends BotThread>> jiter = t.getJobs().iterator();
+                        while (jiter.hasNext()) {
+                            BotJob<? extends BotThread> j = jiter.next();
+                            if( !j.isEnabled() ) {
+                                jiter.remove();
+                                jobsRemoved++;
+                            }
+                        }
+                        
+                        if( !t.isEnabled() ) {
+                            biter.remove();
+                            botsRemoved++;
+                        }
+                    }
+                    
+                    XBotDebug.info("Monitor", ChatColor.CYAN + "Done cleaning jobs. " + ChatColor.YELLOW + jobsRemoved + ChatColor.CYAN + " jobs removed, " + ChatColor.YELLOW + botsRemoved + ChatColor.CYAN + " bots removed.");
+                }
+                
+                updateCount++;
                 Thread.sleep(500);
             } catch (InterruptedException ex) {
                 break;
