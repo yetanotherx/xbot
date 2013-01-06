@@ -31,6 +31,7 @@ public class AIVBot extends BotThread {
     private String instructions = "";
     private Map<String, String> ips = new HashMap<String, String>();
     private List<String> categories = new ArrayList<String>();
+    private List<String> usersBeingChecked = new ArrayList<String>();
 
     public AIVBot(XBot main, String name) {
         super(main, name);
@@ -83,6 +84,14 @@ public class AIVBot extends BotThread {
 
     public synchronized void setIPs(Map<String, String> ips) {
         this.ips = ips;
+    }
+
+    public synchronized List<String> getUsersBeingChecked() {
+        return usersBeingChecked;
+    }
+
+    public synchronized void setUsersBeingChecked(List<String> usersBeingChecked) {
+        this.usersBeingChecked = usersBeingChecked;
     }
 
     public String getVersion() {
