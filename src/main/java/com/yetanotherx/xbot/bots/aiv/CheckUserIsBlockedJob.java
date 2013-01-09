@@ -23,6 +23,11 @@ public class CheckUserIsBlockedJob extends BotJob<AIVBot> {
 
     @Override
     public void doRun() {
+        if( bot.getUsersBeingChecked().contains(user + "::" + page) ) {
+            return; // We're already checking this user
+        }
+        bot.getUsersBeingChecked().add(user + "::" + page);
+        
         try {
             LogEntry[] logs = bot.getParent().getWiki().getIPBlockList(user);
             if( logs.length > 0 ) { // should never be >1
@@ -89,5 +94,6 @@ public class CheckUserIsBlockedJob extends BotJob<AIVBot> {
 
     @Override
     public void doShutdown() {
+        bot.getUsersBeingChecked().remove(user + "::" + page);
     }
 }

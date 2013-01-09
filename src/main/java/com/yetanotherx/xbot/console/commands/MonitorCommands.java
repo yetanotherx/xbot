@@ -123,7 +123,7 @@ public class MonitorCommands extends CommandContainer {
         if (mon.getMemory()[3] > mon.getMemory()[1]) {
             out = ChatColor.YELLOW;
         }
-        if (mon.getMemory()[1] < (mon.getMemory()[2] / 10)) {
+        if (mon.getMemory()[1] < (mon.getMemory()[0] / 10)) {
             out = ChatColor.RED;
         }
         XBotDebug.info("MAIN", ChatColor.YELLOW + "   Used memory: " + out + mon.getMemory()[3] + " MB");

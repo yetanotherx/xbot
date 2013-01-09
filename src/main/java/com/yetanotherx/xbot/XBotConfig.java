@@ -1,16 +1,16 @@
 package com.yetanotherx.xbot;
 
-import java.io.IOException;
+import static com.yetanotherx.xbot.util.Util.asList;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionException;
-import java.io.File;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import static com.yetanotherx.xbot.util.Util.asList;
 
 /**
  * XBot Configuration class.
