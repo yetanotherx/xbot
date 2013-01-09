@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import com.yetanotherx.xbot.wiki.Edit;
 import java.util.Calendar;
 import java.util.ArrayList;
 import com.yetanotherx.xbot.XBotDebug;
@@ -100,7 +101,7 @@ public class MergeDuplicatesJob extends BotJob<AIVBot> {
                         XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                         return;
                     } else {
-                        this.bot.getParent().getWiki().doEdit(page, newCont, tally + summary, false, time);
+                        new Edit(page, newCont, tally + summary, time).run(bot.getParent(), bot.getRunPage());
                     }
                 }
 

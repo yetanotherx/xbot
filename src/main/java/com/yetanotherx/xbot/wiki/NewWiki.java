@@ -1,5 +1,6 @@
-package com.yetanotherx.xbot;
+package com.yetanotherx.xbot.wiki;
 
+import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.console.ChatColor;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import com.yetanotherx.xbot.wiki.Edit;
 import java.util.Calendar;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
@@ -66,7 +67,7 @@ public class SetBacklogJob extends BotJob<AIVBot> {
                         XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                         return;
                     } else {
-                        this.bot.getParent().getWiki().doEdit(page, newCont, summary, false, time);
+                        new Edit(page, newCont, summary, time).run(bot.getParent(), bot.getRunPage());
                     }
                 }
             }

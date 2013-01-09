@@ -132,13 +132,6 @@ public abstract class BotThread extends Thread {
     public String getRealName() {
         return name;
     }
-    
-    protected void edit(String title, String text, String summary, boolean minor) {
-        if( getRunPage() != null && parent.getWiki().checkRunpage(getRunPage()) ) {
-            XBotDebug.error("Wiki", "Could not write to " + title + ": Bot disabled via " + getRunPage());
-            return;
-        }
-    }
 
     public String toString() {
         synchronized (this) {

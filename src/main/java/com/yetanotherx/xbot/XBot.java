@@ -1,5 +1,6 @@
 package com.yetanotherx.xbot;
 
+import com.yetanotherx.xbot.wiki.XBotWiki;
 import com.yetanotherx.xbot.bots.BotRegistration;
 import com.yetanotherx.xbot.threads.MonitorThread;
 import com.yetanotherx.xbot.threads.ServerShutdownThread;
@@ -7,7 +8,6 @@ import com.yetanotherx.xbot.bots.BotThread;
 import com.yetanotherx.xbot.console.ChatColor;
 import com.yetanotherx.xbot.console.ConsoleManager;
 import com.yetanotherx.xbot.console.commands.RootCommands;
-import com.yetanotherx.xbot.console.commands.WikiCommands;
 import com.yetanotherx.xbot.console.commands.util.CommandManager;
 import com.yetanotherx.xbot.exception.CommandException;
 import com.yetanotherx.xbot.exception.CommandUsageException;
@@ -142,7 +142,6 @@ public class XBot {
     private void addCommands() {
         XBotDebug.debug("MAIN", "Registering commands");
         commandManager.register(RootCommands.class);
-        commandManager.register(WikiCommands.class);
 
     }
 

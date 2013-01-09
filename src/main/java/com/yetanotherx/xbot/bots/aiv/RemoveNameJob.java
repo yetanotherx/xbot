@@ -1,10 +1,11 @@
 package com.yetanotherx.xbot.bots.aiv;
 
+import com.yetanotherx.xbot.wiki.Edit;
 import java.util.Calendar;
 import java.util.ArrayList;
 import com.yetanotherx.xbot.util.Util;
 import java.util.Arrays;
-import com.yetanotherx.xbot.NewWiki.User;
+import com.yetanotherx.xbot.wiki.NewWiki.User;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.console.ChatColor;
@@ -124,7 +125,7 @@ public class RemoveNameJob extends BotJob<AIVBot> {
                     XBotDebug.warn("AIV", ChatColor.BLUE + page + ChatColor.YELLOW + " has changed since we read it, not changing.");
                     return;
                 } else {
-                    bot.getParent().getWiki().doEdit(page, content, summary, false, time);
+                    new Edit(page, content, summary, time).run(bot.getParent(), bot.getRunPage());
                 }
                 XBotDebug.info("AIV", ChatColor.GOLD + "Removed " + ChatColor.YELLOW + user + ChatColor.GOLD + " on " + ChatColor.BLUE + page);
             }

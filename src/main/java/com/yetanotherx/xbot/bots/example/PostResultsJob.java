@@ -18,7 +18,7 @@ class PostResultsJob extends BotJob<ExampleBot> {
             try {
                 String a = bot.getParent().getWiki().getPageText("User:X!/sandbox");
                 a += "\n\nSandbox changed!";
-                bot.getParent().getWiki().doEdit("User:X!/Sandbox", a, "notify", true);
+                //bot.getParent().getWiki().doEdit("User:X!/Sandbox", a, "notify", true);
                 XBotDebug.info("Sandbox changed");
             } catch (IOException ex) {
                 Logger.getLogger(PostResultsJob.class.getName()).log(Level.SEVERE, null, ex);

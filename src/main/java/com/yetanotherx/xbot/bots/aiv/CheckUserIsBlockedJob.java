@@ -1,8 +1,8 @@
 package com.yetanotherx.xbot.bots.aiv;
 
 import org.joda.time.Period;
-import com.yetanotherx.xbot.NewWiki.User;
-import com.yetanotherx.xbot.NewWiki.LogEntry;
+import com.yetanotherx.xbot.wiki.NewWiki.User;
+import com.yetanotherx.xbot.wiki.NewWiki.LogEntry;
 import com.yetanotherx.xbot.XBotDebug;
 import com.yetanotherx.xbot.bots.BotJob;
 import com.yetanotherx.xbot.util.Util;
