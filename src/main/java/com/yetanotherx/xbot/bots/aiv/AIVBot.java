@@ -8,34 +8,33 @@ import static com.yetanotherx.xbot.util.Util.toLong;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 public class AIVBot extends BotThread {
 
-    protected final int readRate = 30;
-    protected final String[] pages = new String[]{
-        "Wikipedia:Administrator intervention against vandalism",
-        "Wikipedia:Administrator intervention against vandalism/TB2",
-        "Wikipedia:Usernames for administrator attention",
-        "Wikipedia:Usernames for administrator attention/Bot",
-        "Wikipedia:Usernames for administrator attention/Holding pen"
-    };
-    protected final String[] params = new String[]{
+    protected final static int readRate = 30;
+    protected final static String[] params = new String[]{
         "RemoveBlocked",
         "MergeDuplicates",
         "AutoMark",
         "FixInstructions",
         "AutoBacklog"
     };
-    private final String version = "2.0.23";
+    private final static String version = "2.0.23";
     private String instructions = "";
     private Map<String, String> ips = new HashMap<String, String>();
     private List<String> categories = new ArrayList<String>();
     private List<String> usersBeingChecked = new ArrayList<String>();
+    private Map<String, Boolean> pages = new ConcurrentHashMap<String, Boolean>();
 
     public AIVBot(XBot main, String name) {
         super(main, name);
-
+        pages.put("Wikipedia:Administrator intervention against vandalism", false);
+        pages.put("Wikipedia:Administrator intervention against vandalism/TB2", false);
+        pages.put("Wikipedia:Usernames for administrator attention", false);
+        pages.put("Wikipedia:Usernames for administrator attention/Bot", false);
+        pages.put("Wikipedia:Usernames for administrator attention/Holding pen", false);
     }
 
     @Override
@@ -43,7 +42,7 @@ public class AIVBot extends BotThread {
         this.addJob(new GetIPListJob(this, toLong(0, 0, 5, 0, 0), true));
         this.addJob(new GetInstructionsJob(this, toLong(0, 0, 15, 0, 0), true));
 
-        for (String page : pages) {
+        for (String page : pages.keySet()) {
             if (!this.isRunning()) {
                 break;
             }
@@ -92,6 +91,10 @@ public class AIVBot extends BotThread {
 
     public synchronized void setUsersBeingChecked(List<String> usersBeingChecked) {
         this.usersBeingChecked = usersBeingChecked;
+    }
+
+    public synchronized Map<String, Boolean> getPages() {
+        return pages;
     }
 
     public String getVersion() {
